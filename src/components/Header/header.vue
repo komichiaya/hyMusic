@@ -23,10 +23,13 @@ const dialogVisible = ref(false)
 const isLogin = ref(false)
 const activeName = ref('first')
 const visible = ref(false)
-
-
+const submitBtn = ref("登录")
+const submitType = ref(true)
+const registerBtn = ref('注册')
+const registerType = ref(true)// true:注册 false:登录
+const loginBoHeight = ref('200px')
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-    console.log(tab, event)
+    console.log(tab.props.label)
 }
 
 const handleClose = () => {
@@ -53,17 +56,33 @@ const validatePass = (rule: any, value: any, callback: any) => {
     }
     callback()
 }
-
-
+const validatePass2 = (rule: any, value: any, callback: any) => {
+    if (value === '') {
+        callback(new Error('Please input the password again'))
+    } else if (value !== ruleForm.pass) {
+        callback(new Error("Two inputs don't match!"))
+    } else {
+        callback()
+    }
+}
+const validateCode = (rule: any, value: any, callback: any) => {
+    if (value === '') {
+        callback(new Error('Please input the Code'))
+    }
+    callback()
+}
 const ruleForm = reactive({
     pass: '',
+    checkPass: "",
     username: '',
+    code: ""
 })
 
 const rules = reactive({
     pass: [{ validator: validatePass, trigger: 'blur' }],
-
+    checkPass: [{ validator: validatePass2, trigger: 'blur' }],
     agusernamee: [{ validator: checkUserName, trigger: 'blur' }],
+    code: [{ validator: validateCode, trigger: 'blur' }]
 })
 
 const submitForm = (formEl: FormInstance | undefined) => {
@@ -82,7 +101,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
-    handleClose()
+    // if (registerType) handleClose()
 
 }
 const userEnterSearch = (e: any) => {
@@ -112,11 +131,29 @@ const userFocusInput = () => {
 
     }
 }
-watch(() => route.path,
-    () => {
+const submitBtnClick = () => {
+    submitForm(ruleFormRef.value)
+}
+const registerBtnClick = () => {
+    registerType.value = !registerType.value
+
+    if (registerType.value) {
+        // resetForm(ruleFormRef.value)
+        registerBtn.value = '注册'
+        submitBtn.value = '登录'
+
+    } else {
+        submitBtn.value = '注册'
+        registerBtn.value = '返回'
+    }
+
+}
+watch([route.path, registerType],
+    ([p, t], [preP, preT]) => {
         const { state: { back, forward } } = history
         backType.value = back
         forwardType.value = forward
+        loginBoHeight.value = t ? "200px" : "250px"
     })
 const login = () => {
     dialogVisible.value = true
@@ -190,10 +227,21 @@ const login = () => {
                                     <el-input v-model="ruleForm.pass" autocomplete="off" type="password" show-password
                                         style="width: 200px" />
                                 </el-form-item>
+                                <el-form-item v-if="!registerType" label="请再次输入密码:" prop="checkPass">
+                                    <el-input v-model="ruleForm.checkPass" autocomplete="off" type="password" show-password
+                                        style="width: 200px" />
+                                </el-form-item>
+                                <el-form-item v-if="!registerType" label="验证码:" prop="code">
+                                    <el-input v-model="ruleForm.code" autocomplete="off" type="text" style="width: 200px">
+                                        <template #append>
+                                            <el-button size="small">获取验证码</el-button>
+                                        </template>
+                                    </el-input>
+                                </el-form-item>
                                 <el-form-item>
-                                    <el-button type="primary" @click="submitForm(ruleFormRef)"
-                                        style="margin-right: 5px;">Submit</el-button>
-                                    <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
+                                    <el-button type="primary" @click="submitBtnClick" style="margin-right: 5px;">
+                                        {{ submitBtn }}</el-button>
+                                    <el-button @click="registerBtnClick">{{ registerBtn }}</el-button>
                                 </el-form-item>
 
                             </el-form>
@@ -242,7 +290,7 @@ const login = () => {
 }
 
 .loginBox {
-    height: 200px;
+    height: v-bind(loginBoHeight);
     display: flex;
     flex-direction: column;
     align-content: center;
