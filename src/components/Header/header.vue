@@ -146,9 +146,10 @@ const registerBtnClick = () => {
         submitBtn.value = '注册'
         registerBtn.value = '返回'
     }
+    ruleFormRef.value?.resetFields()
 
 }
-watch([route.path, registerType],
+watch([route, registerType],
     ([p, t], [preP, preT]) => {
         const { state: { back, forward } } = history
         backType.value = back
@@ -170,9 +171,21 @@ const login = () => {
                         <el-button :icon="More" color="#000" class='more' size="large" />
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item>设置</el-dropdown-item>
-                                <el-dropdown-item>账号</el-dropdown-item>
-                                <el-dropdown-item>退出</el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button link @click="router.push('Settings')">
+                                        设置
+                                    </el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button link>
+                                        账号
+                                    </el-button>
+                                </el-dropdown-item>
+                                <el-dropdown-item>
+                                    <el-button link>
+                                        退出
+                                    </el-button>
+                                </el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
