@@ -12,7 +12,7 @@ const router = useRouter()
         </div>
         <div class="averageList">
             <el-card class="box-card" v-for="(item, index) in 6" :key="index" style="cursor: pointer;"
-                @click="() => router.push({ path: '/List', query: { type: 1 } })">
+                @click="() => router.push({ path: '/Singer', query: { type: 1, id: 1 } })">
                 <el-image style="border-radius: 50%;"
                     src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
                 <div style="padding: 14px">

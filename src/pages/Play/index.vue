@@ -19,7 +19,7 @@ const isShow = ref(true)
 const changePlayType = ref(false)
 const lrcArr: (any) = ref([])
 const currentRow = ref(-1)
-const demo = ref(null)
+const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
 
 const progressBar = ref(0)
@@ -32,22 +32,29 @@ const divHight = ref(0)
 const id = ref()
 const beginTime = ref("00:00")
 const overTime = ref("00:00")
-const time = ref(moment(0))
-const oTime = ref(moment(0))
+const time = ref(moment(0, "S"))
+const oTime = ref(moment(0, "S"))
 const isLeavePage = ref(false)
-const a = ref()
+const isSlide = ref(false)
+const isJump = ref(false)
 const changeType = (show: boolean, type: number) => {
     switch (type) {
         case 1:
+            // console.log(oTime.value.format("mm:ss"));
             show ? styleType.value = 'visible' : styleType.value = 'hidden';
-            const t = moment((oTime.value.minute(5).seconds(35) as any) * progressBar.value / 100).format('mm:ss');
-            time.value = moment((oTime.value.minute(5).seconds(35) as any) * progressBar.value / 100);
-            a.value = true;
-            (demo as any).value.seek((oTime.value.minute(5).seconds(35) as any) * progressBar.value / 100)
+            const oM = oTime.value.minute()
+            const oS = oTime.value.second()
+            const oT = oM * 60 + oS
+            const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
+            console.log(moment(t));
+            beginTime.value = moment(t).format('mm:ss')
+            time.value = moment(t)
+            isSlide.value = true;
+            (songPlay as any).value.seek(t)
             if (!changePlayType.value) {
-                (demo as any).value.stop()
+                (songPlay as any).value.stop()
             }
-            beginTime.value = t
+
             break;
         case 2:
             show ? soundType.value = 'visible' : soundType.value = 'hidden';
@@ -63,10 +70,17 @@ const show = () => {
     isShow.value = !isShow.value
 }
 const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
-    console.log(lineNum, txt)
+    // console.log(lineNum, txt)
     currentRow.value = lineNum
 }
-
+const jump = (lineNum: number) => {
+    const t = (songPlay as any).value.lines[lineNum].time;
+    (songPlay as any).value.seek(t);
+    isJump.value = true;
+    clearInterval(id.value)
+    time.value = moment((songPlay as any).value.lines[lineNum].time)
+    play()
+}
 
 /**
  * play() 播放歌词
@@ -85,25 +99,27 @@ const cheack = () => {
 const play = () => {
     id.value = setInterval(() => {
         beginTime.value = time.value.add(1, 's').format("mm:ss")
-        console.log();
-        progressBar.value = Number((time.value.valueOf() / oTime.value.valueOf()).toFixed(4)) * 100
+        const m = time.value.minute() * 60
+        const s = time.value.second()
+        const oM = oTime.value.minute() * 60
+        const oS = oTime.value.second()
+        progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
     }, 1000);
-    if (a.value) {
-        console.log(1);
-        (demo as any).value.togglePlay()
-
-
-    } else {
-        (demo as any).value.play()
-
+    if (isSlide.value) {
+        (songPlay as any).value.togglePlay()
+    } else if (isJump.value) {
+        (songPlay as any).value.seek((songPlay as any).value.lines[currentRow.value + 1].time)
+    }
+    else {
+        (songPlay as any).value.play()
     }
     changePlayType.value = true
 
 
 }
 const stop = () => {
-    alert('暂停播放');
-    (demo as any).value.stop()
+    // alert('暂停播放');
+    (songPlay as any).value.stop()
     changePlayType.value = false
     clearInterval(id.value)
 }
@@ -118,8 +134,8 @@ onMounted(() => {
     overTime.value = oTime.value.minute(5).seconds(35).format("mm:ss")
 
     cheack()
-    demo.value = new Ly(lrc, lrcPlayFn)
-    lrcArr.value = (demo as any).value.lines
+    songPlay.value = new Ly(lrc, lrcPlayFn)
+    lrcArr.value = (songPlay as any).value.lines
     setTimeout(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
@@ -247,7 +263,7 @@ const watchStop = watch([route, currentRow, beginTime],
                         <el-scrollbar height="400px" ref="scrollbarRef" wrap-style="scroll-behavior: smooth;">
                             <ul class="songLrcBox">
                                 <li v-for="(item, index) in  lrcArr " :key="index"
-                                    :class="['songLrc', currentRow == index ? 'currentLyrics' : null]">
+                                    :class="['songLrc', currentRow == index ? 'currentLyrics' : null]" @click='jump(index)'>
                                     <p :id="index + ''">{{ item.txt }}</p>
                                 </li>
                             </ul>

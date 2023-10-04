@@ -224,8 +224,9 @@ const login = () => {
                 </div>
             </el-col>
             <el-col :span="6" :xs="4">
-                <div @click="login" style="cursor: pointer;">
-                    <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+                <div>
+                    <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" @click="login"
+                        style="cursor: pointer;" />
                 </div>
                 <el-dialog v-model="dialogVisible" title="登录账号" width="35%" :before-close="handleClose" align-center center
                     v-if="!isLogin">

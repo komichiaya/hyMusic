@@ -1,11 +1,40 @@
 <!--  -->
 <script setup lang="ts">
+import { useRouter } from "vue-router"
+const router = useRouter()
 const props = defineProps(['songCount'])
+const clickLog: any = ref([])
+const toPlay = (id: string | number) => {
+    //原理就是保留最后3次的点击时间戳，判断数组开头结尾的时间差是否在3000ms内
+    clickLog.value.push((new Date()).getTime())
+    if (clickLog.value.length > 3) {
+        clickLog.value.splice(0, 1)
+    }
+    if (clickLog.value.length === 3) {
+        if (clickLog.value[2] - clickLog.value[0] < 3000) {
+            clickLog.value.splice(0, 3)
+            router.push({
+                path: "/Play", query: {
+                    songId: id,
+                }
+            })
+        }
+    }
+
+}
+const toSinger = (id: string | number) => {
+    router.push({
+        path: "/Singer", query: {
+            type: 1,
+            songId: id,
+        }
+    })
+}
 </script>
 <template>
     <div class="songList">
         <div class="m">
-            <el-row v-for="(item, index) in songCount" :key="index">
+            <el-row v-for="(item, index) in songCount" :key="index" @click="toPlay(2)">
                 <el-col :span="3">
                     <div class="img">
                         <el-image style="width: 100%; height: 100%;
@@ -13,22 +42,22 @@ const props = defineProps(['songCount'])
                             src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" />
                     </div>
                 </el-col>
-                <el-col :span="9">
+                <el-col :span="7">
                     <div class="songInfo">
                         <div class="songName">
                             <span>nihao</span>
                         </div>
-                        <div class="singerName">
+                        <div class="singerName" @click="toSinger(1)">
                             <span>hy</span>
                         </div>
                     </div>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="7">
                     <div class="albumName">
                         <span>你好</span>
                     </div>
                 </el-col>
-                <el-col :span="2">
+                <el-col :span="6">
                     <div class="other">
                         <div class="like">
                             <i class="iconfont icon-aixin"></i>

@@ -18,6 +18,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../pages/list/index.vue"),
   },
   {
+    name: "Singer",
+    path: "/Singer",
+    props: r => ({ type: r.query.type, id: r.query.id }),
+    component: () => import("../pages/list/index.vue"),
+  },
+  {
     name: "Test",
     path: "/Test",
     component: () => import("../pages/test/index.vue"),

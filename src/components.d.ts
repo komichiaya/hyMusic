@@ -20,6 +20,7 @@ declare module '@vue/runtime-core' {
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElCountdown: typeof import('element-plus/es')['ElCountdown']
     ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -46,6 +47,11 @@ declare module '@vue/runtime-core' {
     Index: typeof import('./components/Index/index.vue')['default']
     InfoCard: typeof import('./components/InfoCard/infoCard.vue')['default']
     ListHeader: typeof import('./components/ListHeader/listHeader.vue')['default']
+    NButton: typeof import('naive-ui')['NButton']
+    NConfigProvider: typeof import('naive-ui')['NConfigProvider']
+    NDrawer: typeof import('naive-ui')['NDrawer']
+    NDrawerContent: typeof import('naive-ui')['NDrawerContent']
+    NIcon: typeof import('naive-ui')['NIcon']
     PlayList: typeof import('./components/PlayList/playList.vue')['default']
     PlayListCard: typeof import('./components/InfoCard/PlayListCard.vue')['default']
     Recommend: typeof import('./components/Recommend/recommend.vue')['default']
@@ -55,6 +61,7 @@ declare module '@vue/runtime-core' {
     SearchColumn: typeof import('./components/SearchColumn/searchColumn.vue')['default']
     Singer: typeof import('./components/Singer/Singer.vue')['default']
     SongList: typeof import('./components/SongList/songList.vue')['default']
+    SongSheet: typeof import('./components/SongSheet/songSheet.vue')['default']
   }
   export interface ComponentCustomProperties {
     vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']

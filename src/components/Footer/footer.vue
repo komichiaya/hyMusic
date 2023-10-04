@@ -1,12 +1,27 @@
 <!--  -->
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router"
+import songList from "../SongList/songList.vue"
+import { useWindowSize } from "@vueuse/core"
 const url = ref("https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg")
 const time = ref(0)
 const sound = ref(0)
 const styleType = ref('hidden')
 const soundType = ref('hidden')
 const router = useRouter();
+const drawer = ref(false)
+const { width: w, height: h } = useWindowSize()
+const wStr = ref((w.value * .3) + 'px')
+import { darkTheme } from 'naive-ui'
+const handleClose = (done: () => void) => {
+    ElMessageBox.confirm('Are you sure you want to close this?')
+        .then(() => {
+            done()
+        })
+        .catch(() => {
+            // catch error
+        })
+}
 
 const changeType = (show: boolean, type: number) => {
     switch (type) {
@@ -24,10 +39,21 @@ const changeType = (show: boolean, type: number) => {
 const toPlayPage = (songId: number) => {
     router.push(`/Play?songId=${songId}`)
 }
-const toList = (songId: number) => { }
+const demo = () => {
+
+}
+const clo = () => {
+    drawer.value = false
+}
+watch(drawer, (a, b) => {
+    // drawer.value = a
+    // console.log(a);
+})
+
 </script>
 <template>
-    <div>
+    <div class="m">
+
         <el-row class='f'>
             <el-col :span="8" class="album">
                 <div class="albumPic" @click="toPlayPage(1)">
@@ -74,11 +100,12 @@ const toList = (songId: number) => { }
             </el-col>
             <el-col :span="8">
                 <div class="btngroup">
-                    <el-button type="primary" circle color="#000" class="hidden-xs-only">
+                    <el-button type="primary" circle color="#000" @click="() => drawer = !drawer" v-bind="$attrs">
                         <el-icon>
                             <i class="iconfont icon-05_liebiao"></i>
                         </el-icon>
                     </el-button>
+
                     <el-button type="primary" circle color="#000">
                         <el-icon>
                             <i class="iconfont icon-23_shunxubofang"></i>
@@ -99,9 +126,49 @@ const toList = (songId: number) => { }
                 </div>
             </el-col>
         </el-row>
+
+
+        <n-config-provider :theme="darkTheme">
+            <n-drawer v-model:show="drawer" :width="(w * .3)" :height="h * .8" placement="bottom" :show-mask="false"
+                :resizable="true" class="demo" display-directive="show" :on-update:show="demo"
+                :style="{ width: `${(w * .3)}px`, minWidth: '520px' }">
+
+                <n-drawer-content>
+                    <template #header>
+                        播放列表
+                        <button @click="clo">X</button>
+                    </template>
+                    <songList :songCount="10" />
+
+                </n-drawer-content>
+            </n-drawer>
+
+        </n-config-provider>
+
+
     </div>
 </template>
 <style lang="less">
+.n-drawer.n-drawer--bottom-placement {
+    left: auto !important;
+    bottom: 100px !important;
+    right: 0 !important;
+}
+
+
+.modal {
+    position: absolute !important;
+
+}
+
+.el-drawer.btt,
+.el-drawer.ttb {
+    right: 0;
+    bottom: 100px;
+    width: v-bind(wStr);
+    left: auto;
+}
+
 .el-slider__button {
     width: 15px;
     height: 15px;
@@ -120,10 +187,6 @@ const toList = (songId: number) => { }
     }
 }
 
-
-
-
-
 .el-slider__runway:hover>.el-slider__button-wrapper {
     visibility: visible;
 }
@@ -134,6 +197,11 @@ const toList = (songId: number) => { }
 </style>
 <style scoped lang="less" >
 /* @import url(); 引入css类 */
+
+
+.demo {
+    width: v-bind(wStr);
+}
 
 .f {
     display: flex;

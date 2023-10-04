@@ -1,5 +1,5 @@
-// 0:歌单/专辑 1:歌手 
 <script lang='ts' setup>
+// 0:歌单/专辑 1:歌手 
 import listHeader from "@/components/ListHeader/listHeader.vue"
 import songList from "@/components/SongList/songList.vue";
 import Singer from "@/components/Singer/Singer.vue";
