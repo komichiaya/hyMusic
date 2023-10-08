@@ -70,10 +70,10 @@ const show = () => {
     isShow.value = !isShow.value
 }
 const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
-    // console.log(lineNum, txt)
     currentRow.value = lineNum
 }
 const jump = (lineNum: number) => {
+
     const t = (songPlay as any).value.lines[lineNum].time;
     (songPlay as any).value.seek(t);
     isJump.value = true;
@@ -129,10 +129,8 @@ const move = (currentRow: any) => {
 }
 
 onMounted(() => {
-
     beginTime.value = time.value.format("mm:ss")
     overTime.value = oTime.value.minute(5).seconds(35).format("mm:ss")
-
     cheack()
     songPlay.value = new Ly(lrc, lrcPlayFn)
     lrcArr.value = (songPlay as any).value.lines
@@ -176,6 +174,7 @@ const watchStop = watch([route, currentRow, beginTime],
         <div v-else>
             <div style="width:90vw;height:100%">
                 <el-container class="c">
+                    <!-- 
                     <el-aside width="30%" class="aside">
                         <div class="pic">
                             <el-image style="width: 200px; height: 200px" :src="url" />
@@ -259,6 +258,7 @@ const watchStop = watch([route, currentRow, beginTime],
                             </div>
                         </div>
                     </el-aside>
+ -->
                     <el-main style="width: 70%;" class="main">
                         <el-scrollbar height="400px" ref="scrollbarRef" wrap-style="scroll-behavior: smooth;">
                             <ul class="songLrcBox">
@@ -298,6 +298,8 @@ const watchStop = watch([route, currentRow, beginTime],
     }
 
     .songLrc {
+        cursor: pointer;
+
         p {
             font-size: 24px;
         }

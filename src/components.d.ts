@@ -52,6 +52,7 @@ declare module '@vue/runtime-core' {
     NDrawer: typeof import('naive-ui')['NDrawer']
     NDrawerContent: typeof import('naive-ui')['NDrawerContent']
     NIcon: typeof import('naive-ui')['NIcon']
+    NScrollbar: typeof import('naive-ui')['NScrollbar']
     PlayList: typeof import('./components/PlayList/playList.vue')['default']
     PlayListCard: typeof import('./components/InfoCard/PlayListCard.vue')['default']
     Recommend: typeof import('./components/Recommend/recommend.vue')['default']

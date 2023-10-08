@@ -1,18 +1,47 @@
-<!--  -->
+
+
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router"
 import songList from "../SongList/songList.vue"
 import { useWindowSize } from "@vueuse/core"
-const url = ref("https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg")
-const time = ref(0)
-const sound = ref(0)
-const styleType = ref('hidden')
-const soundType = ref('hidden')
 const router = useRouter();
 const drawer = ref(false)
 const { width: w, height: h } = useWindowSize()
 const wStr = ref((w.value * .3) + 'px')
 import { darkTheme } from 'naive-ui'
+import Ly from "lyric-parser"
+import { lrc } from "../../assets/lrc"
+import { ElScrollbar } from 'element-plus'
+import moment from 'moment'
+
+const rowOffset = 4
+const route = useRoute()
+const is404 = ref(false)
+const isShow = ref(true)
+const changePlayType = ref(false)
+const lrcArr: (any) = ref([])
+const currentRow = ref(-1)
+const songPlay = ref(null)
+const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
+
+const progressBar = ref(0)
+const sound = ref(0)
+const styleType = ref('hidden')
+const soundType = ref('hidden')
+const url =
+    'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+const divHight = ref(0)
+const id = ref()
+const beginTime = ref("00:00")
+const overTime = ref("00:00")
+const time = ref(moment(0, "S"))
+const oTime = ref(moment(0, "S"))
+const isLeavePage = ref(false)
+const isSlide = ref(false)
+const isJump = ref(false)
+const drawer1 = ref(false)
+const active = ref(false)
+
 const handleClose = (done: () => void) => {
     ElMessageBox.confirm('Are you sure you want to close this?')
         .then(() => {
@@ -21,20 +50,6 @@ const handleClose = (done: () => void) => {
         .catch(() => {
             // catch error
         })
-}
-
-const changeType = (show: boolean, type: number) => {
-    switch (type) {
-        case 1:
-            show ? styleType.value = 'visible' : styleType.value = 'hidden'; break;
-        case 2:
-            show ? soundType.value = 'visible' : soundType.value = 'hidden'; break;
-        default:
-            styleType.value = 'hidden';
-            soundType.value = 'hidden';
-            break;
-    }
-
 }
 const toPlayPage = (songId: number) => {
     router.push(`/Play?songId=${songId}`)
@@ -45,18 +60,142 @@ const demo = () => {
 const clo = () => {
     drawer.value = false
 }
-watch(drawer, (a, b) => {
-    // drawer.value = a
-    // console.log(a);
+
+const changeType = (show: boolean, type: number) => {
+    switch (type) {
+        case 1:
+            // console.log(oTime.value.format("mm:ss"));
+            show ? styleType.value = 'visible' : styleType.value = 'hidden';
+            const oM = oTime.value.minute()
+            const oS = oTime.value.second()
+            const oT = oM * 60 + oS
+            const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
+            console.log(moment(t));
+            beginTime.value = moment(t).format('mm:ss')
+            time.value = moment(t)
+            isSlide.value = true;
+            (songPlay as any).value.seek(t)
+            if (!changePlayType.value) {
+                (songPlay as any).value.stop()
+            }
+
+            break;
+        case 2:
+            show ? soundType.value = 'visible' : soundType.value = 'hidden';
+            break;
+        default:
+            styleType.value = 'hidden';
+            soundType.value = 'hidden';
+            break;
+    }
+
+}
+const show = () => {
+    isShow.value = !isShow.value
+}
+const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
+    currentRow.value = lineNum
+}
+const jump = (lineNum: number) => {
+
+    const t = (songPlay as any).value.lines[lineNum].time;
+    (songPlay as any).value.seek(t);
+    isJump.value = true;
+    clearInterval(id.value)
+    time.value = moment((songPlay as any).value.lines[lineNum].time)
+    play()
+}
+
+/**
+ * play() 播放歌词
+ * stop() 暂停播放
+ * seek(startTime) 跳转时间
+ * togglePlay() 切换播放/暂停的时间
+ */
+const cheack = () => {
+    if (JSON.stringify(route.query) == "{}" || route.query.songId == "") {
+        is404.value = true
+    } else {
+        is404.value = false
+
+    }
+}
+const play = () => {
+    id.value = setInterval(() => {
+        beginTime.value = time.value.add(1, 's').format("mm:ss")
+        const m = time.value.minute() * 60
+        const s = time.value.second()
+        const oM = oTime.value.minute() * 60
+        const oS = oTime.value.second()
+        progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
+    }, 1000);
+    if (isSlide.value) {
+        (songPlay as any).value.togglePlay()
+    } else if (isJump.value) {
+        (songPlay as any).value.seek((songPlay as any).value.lines[currentRow.value + 1].time)
+    }
+    else {
+        (songPlay as any).value.play()
+    }
+    changePlayType.value = true
+
+
+}
+const stop = () => {
+    // alert('暂停播放');
+    (songPlay as any).value.stop()
+    changePlayType.value = false
+    clearInterval(id.value)
+}
+const move = (currentRow: any) => {
+    scrollbarRef.value!.setScrollTop((Number(currentRow) - rowOffset) * 40)
+
+}
+
+onMounted(() => {
+    beginTime.value = time.value.format("mm:ss")
+    overTime.value = oTime.value.minute(5).seconds(35).format("mm:ss")
+    cheack()
+    songPlay.value = new Ly(lrc, lrcPlayFn)
+    lrcArr.value = (songPlay as any).value.lines
+    setTimeout(() => {
+        divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
+    })
 })
+onActivated(() => {
+    cheack()
+    move(currentRow.value)
+    isLeavePage.value = false
+})
+onDeactivated(() => {
+    isLeavePage.value = true
+})
+const watchStop = watch([route, currentRow, beginTime],
+    ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
+        cheack()
+        // console.log(currentNewRow, currentOldRow);
+        if (!isLeavePage.value) {
+            if (Number(currentNewRow) > rowOffset && currentNewRow! > currentOldRow!) {
+                if (!(Number(currentNewRow) > lrcArr.value.length)) {
+                    move(currentNewRow)
+                }
+            } else if (Number(currentNewRow) > lrcArr.value.length - 1) {
+                return 0
+            }
+        }
+        if (time.value >= oTime.value) {
+            stop()
+        }
+    }
+
+)
 
 </script>
 <template>
-    <div class="m">
-
+    <div>
         <el-row class='f'>
             <el-col :span="8" class="album">
-                <div class="albumPic" @click="toPlayPage(1)">
+                <div class="albumPic" @click="() => drawer1 = !drawer1">
                     <el-image style="width: 100%; height: 100%" :src="url" fit="fill" />
                 </div>
                 <div class="albumInfo">
@@ -79,10 +218,14 @@ watch(drawer, (a, b) => {
                                 <i class="iconfont icon-29_shangyiji"></i>
                             </el-icon>
                         </el-button>
-                        <el-button type="primary" circle color="#000" size="large">
+                        <el-button type="primary" circle color="#000" size="large" @click="play" v-if="!changePlayType">
                             <el-icon>
                                 <i class="iconfont icon-27_bofang"></i>
-                                <!-- <i class="iconfont icon-28_bofang"></i> -->
+                            </el-icon>
+                        </el-button>
+                        <el-button type="primary" circle color="#000" size="large" @click="stop" v-if="changePlayType">
+                            <el-icon>
+                                <i class="iconfont icon-28_bofang"></i>
                             </el-icon>
                         </el-button>
                         <el-button type="primary" circle color="#000">
@@ -90,22 +233,29 @@ watch(drawer, (a, b) => {
                                 <i class="iconfont icon-30_xiayiji"></i>
                             </el-icon>
                         </el-button>
+                    </div>
 
+                    <div class="schedule">
+                        <p style="font-size: 16px; font-weight: 400;color: #E5EAF3;">
+                            {{ beginTime }}
+                        </p>
+
+                        <el-slider v-model="progressBar" size="small" @input="changeType(true, 1)"
+                            @change="changeType(false, 1)" style="width:100%;margin: 0 20px;" :show-tooltip="false" />
+                        <p style="font-size: 16px; font-weight: 400;color: #E5EAF3;">
+                            {{ overTime }}
+                        </p>
                     </div>
-                    <div class="slider-demo-block">
-                        <el-slider v-model="time" size="small" @input="changeType(true, 1)" @change="changeType(false, 1)"
-                            :show-tooltip="false" />
-                    </div>
+
                 </div>
             </el-col>
             <el-col :span="8">
                 <div class="btngroup">
-                    <el-button type="primary" circle color="#000" @click="() => drawer = !drawer" v-bind="$attrs">
+                    <el-button type="primary" circle color="#000" class="hidden-xs-only" @click="() => drawer = !drawer">
                         <el-icon>
                             <i class="iconfont icon-05_liebiao"></i>
                         </el-icon>
                     </el-button>
-
                     <el-button type="primary" circle color="#000">
                         <el-icon>
                             <i class="iconfont icon-23_shunxubofang"></i>
@@ -123,50 +273,52 @@ watch(drawer, (a, b) => {
                     </el-button>
                     <el-slider v-model="sound" size="small" @input="changeType(true, 2)" @change="changeType(false, 2)"
                         style="width:20%" class="hidden-xs-only" />
+
                 </div>
             </el-col>
         </el-row>
 
-
         <n-config-provider :theme="darkTheme">
-            <n-drawer v-model:show="drawer" :width="(w * .3)" :height="h * .8" placement="bottom" :show-mask="false"
-                :resizable="true" class="demo" display-directive="show" :on-update:show="demo"
-                :style="{ width: `${(w * .3)}px`, minWidth: '520px' }">
-
+            <n-drawer :show="drawer" placement="bottom" :height="h * .8" :show-mask='false' :on-update:show="demo"
+                class="drawer">
                 <n-drawer-content>
                     <template #header>
-                        播放列表
-                        <button @click="clo">X</button>
-                    </template>
-                    <songList :songCount="10" />
+                        <div class="darwer_h">
+                            <div class="title">
+                                播放列表
 
+                            </div>
+                            <div class="closeBtn">
+                                <el-button @click='clo'>X</el-button>
+                            </div>
+                        </div>
+                    </template>
+                    <n-scrollbar>
+                        <div class="demo">
+                            <songList :songCount="10" />
+                        </div>
+                    </n-scrollbar>
                 </n-drawer-content>
             </n-drawer>
-
         </n-config-provider>
-
 
     </div>
 </template>
 <style lang="less">
+.drawer {
+    width: 520px;
+}
+
 .n-drawer.n-drawer--bottom-placement {
     left: auto !important;
     bottom: 100px !important;
     right: 0 !important;
-}
-
-
-.modal {
-    position: absolute !important;
 
 }
 
 .el-drawer.btt,
 .el-drawer.ttb {
-    right: 0;
     bottom: 100px;
-    width: v-bind(wStr);
-    left: auto;
 }
 
 .el-slider__button {
@@ -197,11 +349,53 @@ watch(drawer, (a, b) => {
 </style>
 <style scoped lang="less" >
 /* @import url(); 引入css类 */
+.darwer_h {
+    display: flex;
+    height: 100%;
+    width: var(--n-header-padding);
 
+    .title {}
 
-.demo {
-    width: v-bind(wStr);
+    .close_button {}
+
 }
+
+.control {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 85%;
+
+
+}
+
+.schedule {
+    display: flex;
+    width: 100%;
+    align-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        font-size: 16px;
+        width: 100px;
+    }
+}
+
+.aside {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+
 
 .f {
     display: flex;
