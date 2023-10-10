@@ -19,6 +19,7 @@
     "lyric-parser": "^1.0.1",
     "moment": "^2.29.4",
     "pinia": "^2.0.22",
+    "pubsub-js": "^1.9.4",
     "unplugin-icons": "^0.14.11",
     "vue": "^3.3.4",
     "vue-router": "4",

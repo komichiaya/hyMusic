@@ -5,12 +5,17 @@ export default {
 }
 </script>
 <script setup lang="ts" >
-
 import { useRoute } from "vue-router"
 import Ly from "lyric-parser"
 import { lrc } from "../../assets/lrc"
 import { ElScrollbar } from 'element-plus'
 import moment from 'moment'
+import pubsub from "pubsub-js"
+import { playStore } from "../../store/Play"
+import { storeToRefs } from "pinia"
+
+const pStore = playStore()
+const { currentRow: cR } = storeToRefs(pStore)
 
 const rowOffset = 4
 const route = useRoute()
@@ -18,9 +23,11 @@ const is404 = ref(false)
 const isShow = ref(true)
 const changePlayType = ref(false)
 const lrcArr: (any) = ref([])
-const currentRow = ref(-1)
 const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
+
+
+
 
 const progressBar = ref(0)
 const sound = ref(0)
@@ -37,6 +44,13 @@ const oTime = ref(moment(0, "S"))
 const isLeavePage = ref(false)
 const isSlide = ref(false)
 const isJump = ref(false)
+
+
+
+
+
+
+
 const changeType = (show: boolean, type: number) => {
     switch (type) {
         case 1:
@@ -70,16 +84,18 @@ const show = () => {
     isShow.value = !isShow.value
 }
 const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
-    currentRow.value = lineNum
+    // currentRow.value = lineNum
 }
 const jump = (lineNum: number) => {
-
     const t = (songPlay as any).value.lines[lineNum].time;
-    (songPlay as any).value.seek(t);
+    // (songPlay as any).value.seek(t);
     isJump.value = true;
-    clearInterval(id.value)
+    // clearInterval(id.value)
+    pStore.changeCurrentRow(lineNum);
     time.value = moment((songPlay as any).value.lines[lineNum].time)
-    play()
+    //play()
+    pubsub.publish('jump1', lineNum)
+
 }
 
 /**
@@ -97,18 +113,18 @@ const cheack = () => {
     }
 }
 const play = () => {
-    id.value = setInterval(() => {
-        beginTime.value = time.value.add(1, 's').format("mm:ss")
-        const m = time.value.minute() * 60
-        const s = time.value.second()
-        const oM = oTime.value.minute() * 60
-        const oS = oTime.value.second()
-        progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
-    }, 1000);
+    // id.value = setInterval(() => {
+    //     beginTime.value = time.value.add(1, 's').format("mm:ss")
+    //     const m = time.value.minute() * 60
+    //     const s = time.value.second()
+    //     const oM = oTime.value.minute() * 60
+    //     const oS = oTime.value.second()
+    //     progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
+    // }, 1000);
     if (isSlide.value) {
         (songPlay as any).value.togglePlay()
     } else if (isJump.value) {
-        (songPlay as any).value.seek((songPlay as any).value.lines[currentRow.value + 1].time)
+        (songPlay as any).value.seek((songPlay as any).value.lines[cR.value + 1].time)
     }
     else {
         (songPlay as any).value.play()
@@ -124,6 +140,7 @@ const stop = () => {
     clearInterval(id.value)
 }
 const move = (currentRow: any) => {
+    // console.log(currentRow);
     scrollbarRef.value!.setScrollTop((Number(currentRow) - rowOffset) * 40)
 
 }
@@ -137,16 +154,17 @@ onMounted(() => {
     setTimeout(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
+
 })
 onActivated(() => {
     cheack()
-    move(currentRow.value)
+    move(pStore.currentRow)
     isLeavePage.value = false
 })
 onDeactivated(() => {
     isLeavePage.value = true
 })
-const watchStop = watch([route, currentRow, beginTime],
+const watchStop = watch([route, cR, beginTime],
     ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
         cheack()
         // console.log(currentNewRow, currentOldRow);
@@ -263,7 +281,7 @@ const watchStop = watch([route, currentRow, beginTime],
                         <el-scrollbar height="400px" ref="scrollbarRef" wrap-style="scroll-behavior: smooth;">
                             <ul class="songLrcBox">
                                 <li v-for="(item, index) in  lrcArr " :key="index"
-                                    :class="['songLrc', currentRow == index ? 'currentLyrics' : null]" @click='jump(index)'>
+                                    :class="['songLrc', cR == index ? 'currentLyrics' : null]" @click='jump(index)'>
                                     <p :id="index + ''">{{ item.txt }}</p>
                                 </li>
                             </ul>

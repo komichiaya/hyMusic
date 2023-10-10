@@ -1,9 +1,7 @@
-
-
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router"
 import songList from "../SongList/songList.vue"
-import { useWindowSize } from "@vueuse/core"
+import { useWindowSize, useElementSize } from "@vueuse/core"
 const router = useRouter();
 const drawer = ref(false)
 const { width: w, height: h } = useWindowSize()
@@ -13,7 +11,11 @@ import Ly from "lyric-parser"
 import { lrc } from "../../assets/lrc"
 import { ElScrollbar } from 'element-plus'
 import moment from 'moment'
-
+import pubsub from "pubsub-js"
+import { playStore } from "../../store/Play"
+import { storeToRefs } from "pinia";
+const store = playStore()
+const { currentRow: cR } = storeToRefs(store)
 const rowOffset = 4
 const route = useRoute()
 const is404 = ref(false)
@@ -23,7 +25,6 @@ const lrcArr: (any) = ref([])
 const currentRow = ref(-1)
 const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
-
 const progressBar = ref(0)
 const sound = ref(0)
 const styleType = ref('hidden')
@@ -34,23 +35,18 @@ const divHight = ref(0)
 const id = ref()
 const beginTime = ref("00:00")
 const overTime = ref("00:00")
-const time = ref(moment(0, "S"))
-const oTime = ref(moment(0, "S"))
+const time = ref(moment(0))
+const oTime = ref(moment(0))
 const isLeavePage = ref(false)
 const isSlide = ref(false)
 const isJump = ref(false)
 const drawer1 = ref(false)
 const active = ref(false)
 
-const handleClose = (done: () => void) => {
-    ElMessageBox.confirm('Are you sure you want to close this?')
-        .then(() => {
-            done()
-        })
-        .catch(() => {
-            // catch error
-        })
-}
+const n_drawer = ref(null)
+const { width, height } = useElementSize(n_drawer)
+
+
 const toPlayPage = (songId: number) => {
     router.push(`/Play?songId=${songId}`)
 }
@@ -62,6 +58,7 @@ const clo = () => {
 }
 
 const changeType = (show: boolean, type: number) => {
+    console.log(type)
     switch (type) {
         case 1:
             // console.log(oTime.value.format("mm:ss"));
@@ -70,7 +67,7 @@ const changeType = (show: boolean, type: number) => {
             const oS = oTime.value.second()
             const oT = oM * 60 + oS
             const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
-            console.log(moment(t));
+            console.log(moment().millisecond(t));
             beginTime.value = moment(t).format('mm:ss')
             time.value = moment(t)
             isSlide.value = true;
@@ -96,15 +93,16 @@ const show = () => {
 const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
     currentRow.value = lineNum
 }
-const jump = (lineNum: number) => {
-
+const jump = pubsub.subscribe('jump1', (name: string, lineNum: number) => {
+    console.log((songPlay as any).value.lines[lineNum].time)
     const t = (songPlay as any).value.lines[lineNum].time;
     (songPlay as any).value.seek(t);
     isJump.value = true;
     clearInterval(id.value)
     time.value = moment((songPlay as any).value.lines[lineNum].time)
     play()
-}
+
+})
 
 /**
  * play() 播放歌词
@@ -131,26 +129,25 @@ const play = () => {
     }, 1000);
     if (isSlide.value) {
         (songPlay as any).value.togglePlay()
+        isSlide.value = false
     } else if (isJump.value) {
         (songPlay as any).value.seek((songPlay as any).value.lines[currentRow.value + 1].time)
+        isJump.value = false
     }
     else {
         (songPlay as any).value.play()
+
     }
     changePlayType.value = true
 
 
 }
 const stop = () => {
-    // alert('暂停播放');
     (songPlay as any).value.stop()
     changePlayType.value = false
     clearInterval(id.value)
 }
-const move = (currentRow: any) => {
-    scrollbarRef.value!.setScrollTop((Number(currentRow) - rowOffset) * 40)
 
-}
 
 onMounted(() => {
     beginTime.value = time.value.format("mm:ss")
@@ -162,28 +159,14 @@ onMounted(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
 })
-onActivated(() => {
-    cheack()
-    move(currentRow.value)
-    isLeavePage.value = false
-})
-onDeactivated(() => {
-    isLeavePage.value = true
-})
+
 const watchStop = watch([route, currentRow, beginTime],
     ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
         cheack()
         // console.log(currentNewRow, currentOldRow);
-        if (!isLeavePage.value) {
-            if (Number(currentNewRow) > rowOffset && currentNewRow! > currentOldRow!) {
-                if (!(Number(currentNewRow) > lrcArr.value.length)) {
-                    move(currentNewRow)
-                }
-            } else if (Number(currentNewRow) > lrcArr.value.length - 1) {
-                return 0
-            }
-        }
+        store.changeCurrentRow(currentRow.value)
         if (time.value >= oTime.value) {
+            console.log(1)
             stop()
         }
     }
@@ -195,7 +178,7 @@ const watchStop = watch([route, currentRow, beginTime],
     <div>
         <el-row class='f'>
             <el-col :span="8" class="album">
-                <div class="albumPic" @click="() => drawer1 = !drawer1">
+                <div class="albumPic" @click="toPlayPage(1)">
                     <el-image style="width: 100%; height: 100%" :src="url" fit="fill" />
                 </div>
                 <div class="albumInfo">
@@ -279,8 +262,9 @@ const watchStop = watch([route, currentRow, beginTime],
         </el-row>
 
         <n-config-provider :theme="darkTheme">
+
             <n-drawer :show="drawer" placement="bottom" :height="h * .8" :show-mask='false' :on-update:show="demo"
-                class="drawer">
+                class="drawer" display-directive="show">
                 <n-drawer-content>
                     <template #header>
                         <div class="darwer_h">
@@ -307,6 +291,8 @@ const watchStop = watch([route, currentRow, beginTime],
 <style lang="less">
 .drawer {
     width: 520px;
+
+
 }
 
 .n-drawer.n-drawer--bottom-placement {
@@ -347,12 +333,17 @@ const watchStop = watch([route, currentRow, beginTime],
     visibility: visible;
 }
 </style>
+
 <style scoped lang="less" >
 /* @import url(); 引入css类 */
 .darwer_h {
     display: flex;
     height: 100%;
-    width: var(--n-header-padding);
+    width: 472px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
 
     .title {}
 

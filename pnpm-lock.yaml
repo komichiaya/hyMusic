@@ -14,6 +14,7 @@ specifiers:
   moment: ^2.29.4
   naive-ui: ^2.35.0
   pinia: ^2.0.22
+  pubsub-js: ^1.9.4
   typescript: ^5.0.2
   unplugin-auto-import: ^0.11.2
   unplugin-icons: ^0.14.11
@@ -36,6 +37,7 @@ dependencies:
   lyric-parser: 1.0.1
   moment: 2.29.4
   pinia: 2.0.22_typescript@5.1.6+vue@3.3.4
+  pubsub-js: 1.9.4
   unplugin-icons: 0.14.11
   vue: 3.3.4
   vue-router: 4.1.5_vue@3.3.4
@@ -1314,6 +1316,10 @@ packages:
   /prr/1.0.1:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==}
     optional: true
+
+  /pubsub-js/1.9.4:
+    resolution: {integrity: sha512-hJYpaDvPH4w8ZX/0Fdf9ma1AwRgU353GfbaVfPjfJQf1KxZ2iHaHl3fAUw1qlJIR5dr4F3RzjGaWohYUEyoh7A==}
+    dev: false
 
   /queue-microtask/1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}

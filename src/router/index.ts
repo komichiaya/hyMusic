@@ -68,14 +68,14 @@ const router = createRouter({
     return { top: 0 };
   },
 });
-router.beforeEach(async (to, from) => {
-  const s = store();
-  if (to.path == "/Play" || from.path == "/Play") {
-    if (to.path == "/Play" && from.path == "/Play") {
-      return;
-    } else {
-      s.chageShowFooterType();
-    }
-  }
-});
+// router.beforeEach(async (to, from) => {
+//   const s = store();
+//   if (to.path == "/Play" || from.path == "/Play") {
+//     if (to.path == "/Play" && from.path == "/Play") {
+//       return;
+//     } else {
+//        s.chageShowFooterType();
+//     }
+//   }
+// });
 export default router;
