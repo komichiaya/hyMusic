@@ -1,6 +1,7 @@
 <!--  -->
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { DArrowRight as IconView } from '@element-plus/icons-vue'
 defineProps({
     title: String
 })
@@ -15,11 +16,26 @@ const toList = () => {
         }
     })
 }
+const toUserPage = () => {
+    router.push({
+        name: "User",
+        params: {
+            id: 12333654
+        }
+    })
+}
 </script>
 <template>
     <div class="w">
         <div class="header">
-            {{ title }}:
+            <div class="title">
+                {{ title }}:
+            </div>
+            <el-link @click="toUserPage">
+                Check<el-icon class="el-icon--right">
+                    <DArrowRight />
+                </el-icon>
+            </el-link>
         </div>
         <div>
             <el-col>
@@ -78,8 +94,16 @@ const toList = () => {
         justify-content: space-between;
         align-items: flex-end;
         margin-bottom: 20px;
-        font-size: 28px;
-        font-weight: 700;
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .more {
+            color: #C0C4CC;
+            font-size: 12px
+        }
     }
 
     .list {

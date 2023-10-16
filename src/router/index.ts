@@ -7,11 +7,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../pages/index/index.vue"),
   },
   {
-    name: "Settings",
-    path: "/Settings",
-    component: () => import("../pages/setting/index.vue"),
-  },
-  {
     name: "List",
     path: "/List",
     props: r => ({ type: r.query.type }),
@@ -52,6 +47,22 @@ const routes: RouteRecordRaw[] = [
         path: "search_list/limit=:limit",
         props: r => ({ limit: r.params.limit }),
         component: () => import("../pages/search/search_list.vue"),
+      },
+    ],
+  },
+  {
+    name: "User",
+    path: "/User/:id",
+    props: r => ({ id: r.params.id }),
+    component: () => import("../pages/user/index.vue"),
+    children: [
+      {
+        path: "Settings",
+        component: () => import("../pages/setting/index.vue"),
+      },
+      {
+        path: "userInfo",
+        component: () => import("../pages/user/userInfo.vue"),
       },
     ],
   },

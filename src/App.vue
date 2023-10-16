@@ -39,6 +39,7 @@ body {
 <style scoped lang="less">
 .w {
   padding: 0;
+  min-width: 1200px;
 
   .h {
     width: 100%;

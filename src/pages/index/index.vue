@@ -7,6 +7,6 @@ import RecommendedSinger from '@/components/RecommendedSinger/recommendedSinger.
     <songSheet :title="'用户歌单'" />
     <Recommend />
     <RecommendedSinger />
-    <songSheet :title="'用户歌单'" />
+    <songSheet :title="'推荐歌单'" />
 </template>
 <style lang="less"></style>

@@ -2,7 +2,14 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router"
 const router = useRouter()
-const props = defineProps(['songCount'])
+const props = defineProps({
+    songCount: Number,
+    showLikeBtn: {
+        type: Boolean,
+        default: true,
+    }
+})
+
 const clickLog: any = ref([])
 const toPlay = (id: string | number) => {
     //原理就是保留最后3次的点击时间戳，判断数组开头结尾的时间差是否在3000ms内
@@ -35,7 +42,7 @@ const toSinger = (id: string | number) => {
     <div class="songList">
         <div class="m">
             <el-row v-for="(item, index) in songCount" :key="index" @click="toPlay(2)">
-                <el-col :span="3">
+                <el-col :span="4">
                     <div class="img">
                         <el-image style="width: 100%; height: 100%;
                         border: 1px solid transparent;border-radius: 10px;"
@@ -59,7 +66,7 @@ const toSinger = (id: string | number) => {
                 </el-col>
                 <el-col :span="6">
                     <div class="other">
-                        <div class="like">
+                        <div class="like" v-if="showLikeBtn">
                             <i class="iconfont icon-aixin"></i>
                         </div>
                         <div class="time">
@@ -77,13 +84,13 @@ const toSinger = (id: string | number) => {
 .el-row {
     display: flex;
     flex-wrap: wrap;
-    position: relative;
     box-sizing: border-box;
     align-items: center;
     margin: 8px;
 }
 
 .songList {
+
     .m {
 
         .img {
@@ -92,6 +99,8 @@ const toSinger = (id: string | number) => {
         }
 
         .songInfo {
+            margin-left: 4px;
+
             .songName {
                 font-size: 18px;
                 font-weight: 600;
