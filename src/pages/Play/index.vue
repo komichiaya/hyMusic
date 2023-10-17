@@ -16,7 +16,6 @@ import { storeToRefs } from "pinia"
 
 const pStore = playStore()
 const { currentRow: cR } = storeToRefs(pStore)
-
 const rowOffset = 4
 const route = useRoute()
 const is404 = ref(false)
@@ -25,10 +24,6 @@ const changePlayType = ref(false)
 const lrcArr: (any) = ref([])
 const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
-
-
-
-
 const progressBar = ref(0)
 const sound = ref(0)
 const styleType = ref('hidden')
@@ -44,13 +39,6 @@ const oTime = ref(moment(0, "S"))
 const isLeavePage = ref(false)
 const isSlide = ref(false)
 const isJump = ref(false)
-
-
-
-
-
-
-
 const changeType = (show: boolean, type: number) => {
     switch (type) {
         case 1:
@@ -113,14 +101,6 @@ const cheack = () => {
     }
 }
 const play = () => {
-    // id.value = setInterval(() => {
-    //     beginTime.value = time.value.add(1, 's').format("mm:ss")
-    //     const m = time.value.minute() * 60
-    //     const s = time.value.second()
-    //     const oM = oTime.value.minute() * 60
-    //     const oS = oTime.value.second()
-    //     progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
-    // }, 1000);
     if (isSlide.value) {
         (songPlay as any).value.togglePlay()
     } else if (isJump.value) {
@@ -160,9 +140,11 @@ onActivated(() => {
     cheack()
     move(pStore.currentRow)
     isLeavePage.value = false
+
 })
 onDeactivated(() => {
     isLeavePage.value = true
+
 })
 const watchStop = watch([route, cR, beginTime],
     ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
@@ -176,6 +158,8 @@ const watchStop = watch([route, cR, beginTime],
             } else if (Number(currentNewRow) > lrcArr.value.length - 1) {
                 return 0
             }
+        } else {
+            // console.log(currentNewRow, currentOldRow);
         }
         if (time.value >= oTime.value) {
             stop()
@@ -192,91 +176,6 @@ const watchStop = watch([route, cR, beginTime],
         <div v-else>
             <div style="width:90vw;height:100%">
                 <el-container class="c">
-                    <!-- 
-                    <el-aside width="30%" class="aside">
-                        <div class="pic">
-                            <el-image style="width: 200px; height: 200px" :src="url" />
-                        </div>
-                        <div class="title">
-                            <p class="songName">等天亮</p>
-                            <p class="singleName">TTTianll</p>
-                        </div>
-                        <div class="control">
-                            <div
-                                style="display: flex;flex-direction: column;flex-wrap: nowrap;align-items: center; margin: 5px 0px;">
-                                <div class="btngroup">
-                                    <el-button type="primary" circle color="#000">
-                                        <el-icon>
-                                            <i class="iconfont icon-29_shangyiji"></i>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle color="#000" size="large" @click="play"
-                                        v-if="!changePlayType">
-                                        <el-icon>
-                                            <i class="iconfont icon-27_bofang"></i>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle color="#000" size="large" @click="stop"
-                                        v-if="changePlayType">
-                                        <el-icon>
-                                            <i class="iconfont icon-28_bofang"></i>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle color="#000">
-                                        <el-icon>
-                                            <i class="iconfont icon-30_xiayiji"></i>
-                                        </el-icon>
-                                    </el-button>
-
-                                </div>
-                            </div>
-
-                            <div class="schedule">
-                                <p style="font-size: 20px; font-weight: 400;color: #E5EAF3;">
-                                    {{ beginTime }}
-                                </p>
-
-                                <el-slider v-model="progressBar" size="small" @input="changeType(true, 1)"
-                                    @change="changeType(false, 1)" style="width:100%;margin: 0 20px;"
-                                    :show-tooltip="false" />
-                                <p style="font-size: 20px; font-weight: 400;color: #E5EAF3;">
-                                    {{ overTime }}
-                                </p>
-                            </div>
-                            <div style="display: flex;
-                                    flex-direction: row;
-                                    flex-wrap: nowrap;
-                                    justify-content: center;
-                                    align-items: center;">
-                                <div v-if="isShow" style="margin-right: 8px;">
-                                    <el-button type="primary" circle color="#000" class="hidden-xs-only">
-                                        <el-icon>
-                                            <i class="iconfont icon-05_liebiao"></i>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle color="#000">
-                                        <el-icon>
-                                            <i class="iconfont icon-23_shunxubofang"></i>
-                                        </el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle color="#000">
-                                        <el-icon>
-                                            <i class="iconfont icon-22_suijibofang"></i>
-                                        </el-icon>
-                                    </el-button>
-                                </div>
-                                <el-button type="primary" circle color="#000" @click="show">
-                                    <el-icon>
-                                        <i class="iconfont icon-02_shengyin"></i>
-                                    </el-icon>
-                                </el-button>
-                                <el-slider v-model="sound" size="small" @input="changeType(true, 2)"
-                                    @change="changeType(false, 2)" style="width:50%" class="hidden-xs-only" v-if="!isShow"
-                                    :style="{ marginLeft: 8 + 'px' }" placement="bottom" />
-                            </div>
-                        </div>
-                    </el-aside>
- -->
                     <el-main style="width: 70%;" class="main">
                         <el-scrollbar height="400px" ref="scrollbarRef" wrap-style="scroll-behavior: smooth;">
                             <ul class="songLrcBox">
@@ -286,7 +185,6 @@ const watchStop = watch([route, cR, beginTime],
                                 </li>
                             </ul>
                         </el-scrollbar>
-
                     </el-main>
                 </el-container>
             </div>
