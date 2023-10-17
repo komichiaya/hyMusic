@@ -52,6 +52,7 @@ declare module '@vue/runtime-core' {
     InfoCard: typeof import('./components/InfoCard/infoCard.vue')['default']
     List: typeof import('./components/CardList/card List.vue')['default']
     ListHeader: typeof import('./components/ListHeader/listHeader.vue')['default']
+    Login: typeof import('./components/Login/login.vue')['default']
     MyFavouriteMusic: typeof import('./components/MyFavouriteMusic/index.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']

@@ -32,7 +32,7 @@ const toUserPage = () => {
                 {{ title }}:
             </div>
             <el-link @click="toUserPage">
-                Check<el-icon class="el-icon--right">
+                more<el-icon class="el-icon--right">
                     <DArrowRight />
                 </el-icon>
             </el-link>
