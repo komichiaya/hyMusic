@@ -2,26 +2,37 @@
 import type { FormInstance, FormRules } from 'element-plus'
 import type { TabsPaneContext } from 'element-plus'
 import { fa } from 'element-plus/es/locale';
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router';
+import { userStore } from "@/store/User"
+
 const route = useRoute()
 const router = useRouter();
 const submitBtn = ref("登录")
 const registerBtn = ref('注册')
 const registerType = ref(true)// true:注册 false:登录
 const loginBoHeight = ref('200px')
-
-
+const QRtype = ref(false)
 const dialogVisible = ref(false)
 const isLogin = ref(false)
 const activeName = ref('first')
 const submitType = ref(true)
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-    console.log(tab.props.label)
+const uT = userStore()
+
+
+
+const handleClick = async (tab: TabsPaneContext, event: Event) => {
+    if (tab.props.label === '二维码登录') {
+        QRtype.value = true
+        await uT.getQRKey()
+        uT.QRLogin(uT.QRkey)
+    }
 }
+
 
 const handleClose = () => {
     dialogVisible.value = false
-
+    clearInterval(uT.IntervalId)
 }
 const ruleFormRef = ref<FormInstance>()
 
@@ -91,9 +102,17 @@ const resetForm = (formEl: FormInstance | undefined) => {
 
 }
 
-
+onMounted(() => {
+    const userToken = JSON.stringify(localStorage.getItem('userCookie'))
+    if (userToken != 'null') {
+        isLogin.value = true
+    } else {
+        isLogin.value = false
+    }
+})
 const submitBtnClick = () => {
     submitForm(ruleFormRef.value)
+    isLogin.value = true
 }
 const registerBtnClick = () => {
     registerType.value = !registerType.value
@@ -110,12 +129,24 @@ const registerBtnClick = () => {
     ruleFormRef.value?.resetFields()
 
 }
-watch([route, registerType],
-    ([p, t], [preP, preT]) => {
+watch([route, registerType, QRtype],
+    ([p, t, Q], [preP, preT, preQ]) => {
         loginBoHeight.value = t ? "200px" : "250px"
+        if (QRtype.value) {
+            uT.pollingCheckQR()
+        }
     })
 const login = () => {
-    dialogVisible.value = true
+    if (!isLogin.value) {
+        dialogVisible.value = true
+    } else {
+        router.push({
+            name: "User",
+            params: {
+                id: 1234
+            }
+        })
+    }
 }
 </script>
 <template>
@@ -159,7 +190,15 @@ const login = () => {
 
             <el-tab-pane label="二维码登录" name="second">
                 <div class="QRcode">
-                    <img src="../../assets/pic.png" alt="" style="height: 100%;width: 100%;">
+                    <!-- <img > -->
+                    <el-image :src="uT.QRbase64" alt="" style="height: 100%;width: 100%;" v-loading="uT.loading">
+
+                        <template #error>
+                            <div class="image-slot">
+                                <el-icon><icon-picture /></el-icon>
+                            </div>
+                        </template>
+                    </el-image>
                 </div>
             </el-tab-pane>
 

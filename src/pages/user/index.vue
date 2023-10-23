@@ -1,10 +1,21 @@
 <!--  -->
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import MyFavouriteMusic from "@/components/MyFavouriteMusic/index.vue"
 import CardList from "@/components/CardList/cardList.vue"
 
 const route = useRoute()
+const router = useRouter()
+const typeList = ref(['所有歌单', '我创建的歌单', '我收藏的歌单',])
+const id: any = ref(null)
+const t = ref('')
+
+const changeType = (type: string, key: number) => {
+    id.value = key
+    t.value = typeList.value[key] == '所有歌单' ? 'all' : 'other'
+
+
+}
 </script>
 <template>
     <div>
@@ -18,7 +29,17 @@ const route = useRoute()
                         我的歌单：
                     </p>
                 </div>
-                <CardList />
+                <div class="b">
+                    <div class="h">
+                        <el-check-tag v-for="(item, key) in  typeList" :key="key" @change="changeType(item, key)"
+                            :checked="key == id ? true : false" style="margin-right:8px">
+                            {{ item }}
+                        </el-check-tag>
+                    </div>
+                    <div class="main">
+                        <CardList />
+                    </div>
+                </div>
             </div>
         </div>
     </div>

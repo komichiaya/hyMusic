@@ -1,11 +1,9 @@
 <!--  -->
 <script setup lang="ts">
 import CardList from "@/components/CardList/cardList.vue"
-
-
 </script>
 <template>
-    <CardList />
+    <CardList :type="''" />
 </template>
 
 <style scoped lang="less">

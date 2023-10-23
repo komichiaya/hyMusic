@@ -2,6 +2,14 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
+defineProps({
+    type: String,
+    typeNum: {
+        type: Number,
+        default: 0,
+        require: true
+    }
+})
 const router = useRouter()
 const route = useRoute()
 const { width, height } = useWindowSize()

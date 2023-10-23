@@ -1,17 +1,22 @@
 import { instance, instanceLogin } from "./ajax";
 
-export const getCode = () =>
-  instanceLogin({
-    responseType: "blob",
-    url: `/common/image_code.jsp?tiem=${new Date().getTime()}`,
+export const userLoginQRCreateKey = () =>
+  instance({
+    url: "/login/qr/key",
   });
-export const login = (data: any) =>
-  instanceLogin({
-    url: "/ajax/login",
-    method: "POST",
-    responseType: "json",
-    headers: {
-      "Content- Type": "application/x-www-form-urlencoded; charset=UTF-8",
+export const userLoginQR = (key: any) =>
+  instance({
+    url: "/login/qr/create",
+    params: {
+      key,
+      qrimg: true,
     },
-    data,
+  });
+export const userLoginQRCheck = (key: any) =>
+  instance({
+    url: "/login/qr/check",
+    params: {
+      key,
+      timerstamp: new Date().getTime(),
+    },
   });
