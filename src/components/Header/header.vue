@@ -5,10 +5,11 @@ import {
     ArrowLeftBold, ArrowRightBold, More, HomeFilled
 } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router';
-
+import { ElMessage } from "element-plus"
 
 import { useElementSize } from '@vueuse/core'
 import { debounce } from "../../assets/tools"
+import { userStore } from "@/store/User"
 
 
 const el = ref(null)
@@ -20,7 +21,7 @@ const backType = ref((history.state as any).back)
 const forwardType = ref((history.state as any).forward)
 
 const visible = ref(false)
-
+const uS = userStore()
 
 const userInputSearch = (e: any) => {
     debounce(() => {
@@ -48,6 +49,17 @@ const userEnterSearch = (e: any) => {
             }
         })
     }
+}
+const loginOut = async () => {
+    localStorage.removeItem('userCookie')
+    const res = await uS.userLogout()
+    if (res) {
+        ElMessage({
+            message: '退出成功',
+            type: 'success',
+        })
+    }
+    location.reload()
 }
 watch([route],
     () => {
@@ -79,7 +91,7 @@ watch([route],
                                     </el-button>
                                 </el-dropdown-item>
                                 <el-dropdown-item>
-                                    <el-button link>
+                                    <el-button link @click="loginOut">
                                         退出
                                     </el-button>
                                 </el-dropdown-item>

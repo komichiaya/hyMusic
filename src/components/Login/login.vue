@@ -1,9 +1,9 @@
 <script setup lang='ts'>
-import type { FormInstance, FormRules } from 'element-plus'
-import type { TabsPaneContext } from 'element-plus'
+import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
 import { fa } from 'element-plus/es/locale';
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router';
+import { MutationType } from 'pinia'
 import { userStore } from "@/store/User"
 
 const route = useRoute()
@@ -17,22 +17,34 @@ const dialogVisible = ref(false)
 const isLogin = ref(false)
 const activeName = ref('first')
 const submitType = ref(true)
-const uT = userStore()
+const uS = userStore()
+const offlineAvatar = ref('https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png')
 
+uS.$subscribe((mutation: any, state: any) => {
+    if (state.isLogin && dialogVisible.value) {
+        dialogVisible.value = false
+        isLogin.value = true
+        uS.getUserInfo()
+        ElMessage({
+            showClose: true,
+            message: '登录成功',
+            type: 'success',
+        })
 
-
+    }
+})
 const handleClick = async (tab: TabsPaneContext, event: Event) => {
     if (tab.props.label === '二维码登录') {
         QRtype.value = true
-        await uT.getQRKey()
-        uT.QRLogin(uT.QRkey)
+        await uS.getQRKey()
+        uS.QRLogin(uS.QRkey)
     }
 }
 
 
 const handleClose = () => {
     dialogVisible.value = false
-    clearInterval(uT.IntervalId)
+    clearInterval(uS.IntervalId)
 }
 const ruleFormRef = ref<FormInstance>()
 
@@ -129,12 +141,20 @@ const registerBtnClick = () => {
     ruleFormRef.value?.resetFields()
 
 }
+const refreshQR = async () => {
+    await uS.getQRKey()
+    console.log(uS.QRkey, uS.IntervalId);
+    uS.QRLogin(uS.QRkey)
+    clearInterval(uS.IntervalId)
+    uS.pollingCheckQR()
+}
 watch([route, registerType, QRtype],
     ([p, t, Q], [preP, preT, preQ]) => {
         loginBoHeight.value = t ? "200px" : "250px"
         if (QRtype.value) {
-            uT.pollingCheckQR()
+            uS.pollingCheckQR()
         }
+
     })
 const login = () => {
     if (!isLogin.value) {
@@ -143,7 +163,7 @@ const login = () => {
         router.push({
             name: "User",
             params: {
-                id: 1234
+                id: uS.userInfo.userId
             }
         })
     }
@@ -151,8 +171,7 @@ const login = () => {
 </script>
 <template>
     <div>
-        <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" @click="login"
-            style="cursor: pointer;" />
+        <el-avatar :src="isLogin ? uS.userInfo.avatarUrl : offlineAvatar" @click="login" style="cursor: pointer;" />
     </div>
     <el-dialog v-model="dialogVisible" title="登录账号" width="35%" :before-close="handleClose" align-center center
         v-if="!isLogin">
@@ -191,7 +210,8 @@ const login = () => {
             <el-tab-pane label="二维码登录" name="second">
                 <div class="QRcode">
                     <!-- <img > -->
-                    <el-image :src="uT.QRbase64" alt="" style="height: 100%;width: 100%;" v-loading="uT.loading">
+                    <el-image :src="uS.QRbase64" alt="QRCode" title='点击刷新二维码' style="height: 100%;width: 100%;"
+                        v-loading="uS.loading" @click='refreshQR'>
 
                         <template #error>
                             <div class="image-slot">

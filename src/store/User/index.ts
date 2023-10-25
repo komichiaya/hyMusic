@@ -1,7 +1,11 @@
 import { defineStore } from "pinia";
-import { userLoginQRCheck, userLoginQR, userLoginQRCreateKey } from "@/api";
-import { ElLoading } from "element-plus";
-let loadingInstance;
+import {
+  userLoginQRCheck,
+  userLoginQR,
+  userLoginQRCreateKey,
+  getAccount,
+  logout,
+} from "@/api";
 
 export const userStore = defineStore("userStore", {
   state: () => {
@@ -9,8 +13,14 @@ export const userStore = defineStore("userStore", {
       userToken: "",
       QRbase64: "",
       QRkey: "",
-      IntervalId: "",
+      IntervalId: 0,
       loading: true,
+      isLogin: false,
+      userInfo: {
+        code: "",
+        userId: "",
+        avatarUrl: "",
+      },
     };
   },
   actions: {
@@ -32,13 +42,28 @@ export const userStore = defineStore("userStore", {
         const res = await userLoginQRCheck(this.QRkey);
         if (res.data === 800) {
           this.getQRKey();
+          this.isLogin = false;
         }
         if (res.code === 803) {
           clearInterval(this.IntervalId);
           localStorage.setItem("userCookie", res.cookie);
+          this.isLogin = true;
         }
       }, 3000);
     },
+    async userLogout() {
+      const res = await logout();
+      if (res.code == 200) {
+        return true;
+      }
+    },
+    async getUserInfo() {
+      const res = await getAccount();
+      if (res.code == 200) {
+        console.log(res);
+        this.userInfo = res.profile;
+      }
+    },
   },
-  gatters: {},
+  // gatters: {},
 });
