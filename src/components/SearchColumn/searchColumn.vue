@@ -9,7 +9,7 @@ const currentDate = ref(new Date())
             <slot></slot>
         </div>
         <div class="list">
-            <el-card :body-style="{ padding: '0px' }" v-for="item in 6">
+            <el-card :body-style="{ padding: '0px' }" v-for="item in 5">
                 <div style="height: 300px;">
                     <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png"
                         class="image" />
@@ -35,7 +35,7 @@ const currentDate = ref(new Date())
 
     .list {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 20px
     }
 }

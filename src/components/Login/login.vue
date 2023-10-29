@@ -1,10 +1,10 @@
 <script setup lang='ts'>
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
-import { fa } from 'element-plus/es/locale';
+// import { fa } from 'element-plus/es/locale';
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router';
 import { MutationType } from 'pinia'
-import { userStore } from "@/store/User"
+import { userStore } from "@/store/User/userInfo"
 
 const route = useRoute()
 const router = useRouter();
@@ -19,7 +19,7 @@ const activeName = ref('first')
 const submitType = ref(true)
 const uS = userStore()
 const offlineAvatar = ref('https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png')
-
+const dialogCloseType = ref(false)
 uS.$subscribe((mutation: any, state: any) => {
     if (state.isLogin && dialogVisible.value) {
         dialogVisible.value = false
@@ -31,6 +31,7 @@ uS.$subscribe((mutation: any, state: any) => {
             type: 'success',
         })
 
+
     }
 })
 const handleClick = async (tab: TabsPaneContext, event: Event) => {
@@ -38,6 +39,8 @@ const handleClick = async (tab: TabsPaneContext, event: Event) => {
         QRtype.value = true
         await uS.getQRKey()
         uS.QRLogin(uS.QRkey)
+    } else {
+        QRtype.value = false
     }
 }
 
@@ -118,6 +121,7 @@ onMounted(() => {
     const userToken = JSON.stringify(localStorage.getItem('userCookie'))
     if (userToken != 'null') {
         isLogin.value = true
+        uS.getUserInfo()
     } else {
         isLogin.value = false
     }
@@ -143,16 +147,17 @@ const registerBtnClick = () => {
 }
 const refreshQR = async () => {
     await uS.getQRKey()
-    console.log(uS.QRkey, uS.IntervalId);
     uS.QRLogin(uS.QRkey)
-    clearInterval(uS.IntervalId)
     uS.pollingCheckQR()
 }
-watch([route, registerType, QRtype],
-    ([p, t, Q], [preP, preT, preQ]) => {
+watch([route, registerType, QRtype, dialogCloseType],
+    ([p, t, Q, dt], [preP, preT, preQ, preDT]) => {
         loginBoHeight.value = t ? "200px" : "250px"
-        if (QRtype.value) {
+        if (Q) {
             uS.pollingCheckQR()
+        } else {
+            clearInterval(uS.IntervalId)
+
         }
 
     })
@@ -174,7 +179,7 @@ const login = () => {
         <el-avatar :src="isLogin ? uS.userInfo.avatarUrl : offlineAvatar" @click="login" style="cursor: pointer;" />
     </div>
     <el-dialog v-model="dialogVisible" title="登录账号" width="35%" :before-close="handleClose" align-center center
-        v-if="!isLogin">
+        destroy-on-close v-if="!isLogin" @close="() => dialogCloseType = true" @open="() => dialogCloseType = false">
         <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="账号登录" name="first">
                 <el-form ref="ruleFormRef" :model="ruleForm" status-icon :rules="rules" label-width="120px"
@@ -253,4 +258,4 @@ const login = () => {
     height: 200px;
     margin: 0 auto;
 }
-</style>
+</style>@/store/User/userInfo

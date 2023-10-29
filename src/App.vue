@@ -3,6 +3,7 @@ import 'element-plus/theme-chalk/display.css'
 import Home from './pages/home/index.vue';
 import Header from '@/components/Header/header.vue'
 import Footer from '@/components/Footer/footer.vue'
+import('minireset.css')
 import { useElementSize } from '@vueuse/core'
 import { store } from "./store"
 import { storeToRefs } from 'pinia';

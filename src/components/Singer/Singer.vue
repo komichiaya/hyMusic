@@ -1,4 +1,3 @@
-<!--  -->
 <script setup lang='ts'>
 import {
     CaretRight,
@@ -6,8 +5,17 @@ import {
 } from '@element-plus/icons-vue'
 import songList from "@/components/SongList/songList.vue";
 import playList from '../PlayList/playList.vue';
+import { articInfoState } from "@/store/Artist/artistInfo"
+import { useRoute } from "vue-router"
+const route = useRoute()
+const aIF = articInfoState()
+const props = defineProps(['songList'])
 const songCount = ref(5)
+const SL = computed(() => props.songList.slice(0, songCount.value))
 const showMoreOrLess = ref('显示更多内容')
+onMounted(() => {
+    aIF.getArtistAlbum(Number(route.query.id), 5)
+})
 const more_less = () => {
     switch (songCount.value) {
         case 5:
@@ -20,6 +28,9 @@ const more_less = () => {
             break;
     }
 }
+watch(SL, (newV, oldV) => {
+    console.log(newV, oldV);
+})
 </script>
 <template>
     <div class="albumList">
@@ -30,12 +41,12 @@ const more_less = () => {
                 </div>
             </div>
             <div class="list">
-                <songList :songCount="songCount" />
+                <songList :songList="SL" />
             </div>
             <div class="more">
                 <p @click="more_less" style="cursor: pointer;display: inline;">{{ showMoreOrLess }}</p>
             </div>
-            <playList title="音乐作品" />
+            <playList title="音乐作品" :hotAlbums="aIF.hotAlbums" />
         </div>
     </div>
 </template>

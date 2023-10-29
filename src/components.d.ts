@@ -45,6 +45,7 @@ declare module '@vue/runtime-core' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
+    ElText: typeof import('element-plus/es')['ElText']
     Footer: typeof import('./components/Footer/footer.vue')['default']
     Header: typeof import('./components/Header/header.vue')['default']
     Home: typeof import('./components/Home/home.vue')['default']

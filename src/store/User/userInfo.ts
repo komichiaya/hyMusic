@@ -5,6 +5,8 @@ import {
   userLoginQRCreateKey,
   getAccount,
   logout,
+  getUserFollows,
+  getUserLikeArtists,
 } from "@/api";
 
 export const userStore = defineStore("userStore", {
@@ -21,6 +23,8 @@ export const userStore = defineStore("userStore", {
         userId: "",
         avatarUrl: "",
       },
+      userFollows: [],
+      followArtists: [],
     };
   },
   actions: {
@@ -37,9 +41,10 @@ export const userStore = defineStore("userStore", {
       this.loading = false;
       this.QRbase64 = qrimg;
     },
-    pollingCheckQR() {
+    pollingCheckQR(type: boolean | undefined = undefined) {
+      clearInterval(this.IntervalId);
       this.IntervalId = setInterval(async () => {
-        const res = await userLoginQRCheck(this.QRkey);
+        const res = await userLoginQRCheck(this.QRkey, type);
         if (res.data === 800) {
           this.getQRKey();
           this.isLogin = false;
@@ -48,6 +53,10 @@ export const userStore = defineStore("userStore", {
           clearInterval(this.IntervalId);
           localStorage.setItem("userCookie", res.cookie);
           this.isLogin = true;
+        }
+        if (res.code === 502) {
+          clearInterval(this.IntervalId);
+          this.pollingCheckQR(true);
         }
       }, 3000);
     },
@@ -60,8 +69,24 @@ export const userStore = defineStore("userStore", {
     async getUserInfo() {
       const res = await getAccount();
       if (res.code == 200) {
-        console.log(res);
-        this.userInfo = res.profile;
+        if (res.profile) {
+          this.userInfo = res.profile;
+          return true;
+        } else {
+          return false;
+        }
+      }
+    },
+    async getFollowsFriend(uid: string | number) {
+      const res = await getUserFollows(uid);
+      if (res.code === 200) {
+        this.userFollows = res.follow;
+      }
+    },
+    async getUserFollowArt(limit: number) {
+      const res = await getUserLikeArtists(limit);
+      if (res.code === 200) {
+        this.followArtists = res.data;
       }
     },
   },

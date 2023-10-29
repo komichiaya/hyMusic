@@ -17,8 +17,8 @@ watch(() => route.fullPath,
 </script>
 <template>
     <el-scrollbar ref='scrollbarRef' :height="height - anotherHight" id='scrollbar'>
-        <div style="padding:64px 5vw 96px 5vw;">
-            <div style="margin:10px 0;">
+        <div style="padding:64px 5vw 96px; overflow-y: hidden; width: 100%;">
+            <div>
                 <router-view v-slot="{ Component, route }">
                     <keep-alive>
                         <component :is="Component" :key="route.name" v-if="route.meta.keepAlive"></component>

@@ -1,13 +1,51 @@
 <!--  -->
 <script setup lang="ts">
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
+import { songListInfo } from "@/store/SongList/songListInfo"
+import { userStore } from "@/store/User/userInfo"
+import { articInfoState } from '@/store/Artist/artistInfo';
+import moment from "moment"
+import { ElLoading } from 'element-plus'
+
+
 const router = useRouter()
-const props = defineProps({
-    songCount: Number,
-    showLikeBtn: {
-        type: Boolean,
+const route = useRoute()
+const sLI = songListInfo()
+const uS = userStore()
+const aLF = articInfoState()
+const type = ref("")
+const listId = ref(0)
+const offset = ref(0)
+const isLike = ref(false)
+const loading = ref(false)
+const list: any = ref([])
+interface Props {
+    songList: { id: number; al: { picUrl: string; name: string; }; name: string; ar: [{ name: string; id: number; }]; dt: number; }[],
+    showLikeBtn?: {
+        type: boolean,
         default: true,
     }
+}
+const props = defineProps<Props>()
+type mutationType = {
+    events: {
+        newValue: [],
+        oldValue: []
+    }
+}
+sLI.$subscribe((mutation, state) => {
+    if ((mutation.events as any).newValue.length != (mutation.events as any).oldValue.length) {
+        console.log(1);
+    }
+})
+onMounted(() => {
+    type.value = route.query.type as any
+    listId.value = route.query.id as any
+
+
+})
+onUnmounted(() => {
+    console.log(1);
 })
 
 const clickLog: any = ref([])
@@ -37,40 +75,65 @@ const toSinger = (id: string | number) => {
         }
     })
 }
+const check = (id: string | number) => {
+    const b = sLI.likeSongIDList.find((item: number) =>
+        item == id
+    )
+    isLike.value = !Boolean(b)
+    return b
+}
+
+const likeSong = (id: string | number) => {
+    // isLike.value = Boolean(check(id))
+    sLI.setLikeSont(id, Boolean(!isLike.value))
+    sLI.getLikeSongIDList(uS.userInfo.userId)
+}
+
+watch(
+    () => route.query,
+    (now) => {
+        type.value = now.type as any
+        listId.value = now.id as any
+    }
+)
 </script>
 <template>
-    <div class="songList">
-        <div class="m">
-            <el-row v-for="(item, index) in songCount" :key="index" @click="toPlay(2)">
+    <div class="songList" v-loading="loading">
+        <div class="m" v-if="songList.length">
+            <el-row class="song" v-for="(item, index) in songList" :key="item.id" @click="toPlay(item.id)">
                 <el-col :span="4">
                     <div class="img">
                         <el-image style="width: 100%; height: 100%;
-                        border: 1px solid transparent;border-radius: 10px;"
-                            src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg" />
+                        border: 1px solid transparent;border-radius: 10px;" :src="item.al.picUrl + '?param=200y200'"
+                            lazy />
                     </div>
                 </el-col>
                 <el-col :span="7">
                     <div class="songInfo">
                         <div class="songName">
-                            <span>nihao</span>
+                            <span>{{ item.name }}</span>
                         </div>
-                        <div class="singerName" @click="toSinger(1)">
-                            <span>hy</span>
+                        <div class="singerName">
+
+                            <div v-for="it in item.ar">
+                                <span @click="toSinger(it.id)">{{ it.name }}</span>
+                            </div>
                         </div>
                     </div>
                 </el-col>
                 <el-col :span="7">
                     <div class="albumName">
-                        <span>你好</span>
+                        <span>{{ item.al.name }}</span>
                     </div>
                 </el-col>
                 <el-col :span="6">
                     <div class="other">
                         <div class="like" v-if="showLikeBtn">
-                            <i class="iconfont icon-aixin"></i>
+                            <i :class="check(item.id) ? 'iconfont icon-aixin' : 'iconfont icon-aixin1'"
+                                @click="likeSong(item.id)"></i>
                         </div>
                         <div class="time">
-                            <span>00:00</span>
+                            <span>{{ moment(item.dt).format("mm:ss") }}</span>
                         </div>
                     </div>
                 </el-col>
@@ -81,6 +144,7 @@ const toSinger = (id: string | number) => {
 
 <style scoped lang="less">
 /* @import url(); 引入css类 */
+
 .el-row {
     display: flex;
     flex-wrap: wrap;
@@ -92,6 +156,12 @@ const toSinger = (id: string | number) => {
 .songList {
 
     .m {
+
+        :hover {
+            background: #303133;
+        }
+
+
 
         .img {
             width: 50px;
@@ -114,9 +184,18 @@ const toSinger = (id: string | number) => {
             }
 
             .singerName {
-                color: inherit;
-                text-decoration: none;
-                cursor: pointer;
+                display: flex;
+
+                div {
+                    margin-right: 5px;
+
+                    span {
+                        color: inherit;
+                        text-decoration: none;
+                        cursor: pointer;
+                    }
+                }
+
 
             }
         }
@@ -131,6 +210,7 @@ const toSinger = (id: string | number) => {
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             overflow: hidden;
+            max-width: 300px;
         }
 
         .other {
@@ -139,6 +219,7 @@ const toSinger = (id: string | number) => {
 
             .like {
                 width: 80px;
+                cursor: pointer;
             }
 
             .time {

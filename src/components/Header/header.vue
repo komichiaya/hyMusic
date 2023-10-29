@@ -9,7 +9,7 @@ import { ElMessage } from "element-plus"
 
 import { useElementSize } from '@vueuse/core'
 import { debounce } from "../../assets/tools"
-import { userStore } from "@/store/User"
+import { userStore } from "@/store/User/userInfo"
 
 
 const el = ref(null)
@@ -169,4 +169,4 @@ watch([route],
     flex: 1;
     align-items: center;
 }
-</style>
+</style>@/store/User/userInfo

@@ -10,11 +10,11 @@ const title = ['艺人', '播放清单', '专辑', '电台', '用户']
     <div class="m">
         <div class="t">
 
-            <div class="popular">
+            <!-- <div class="popular">
                 <div class="title">热门搜索结果</div>
 
                 <InfoCard />
-            </div>
+            </div> -->
             <div class="songs">
                 <div class="title">歌曲</div>
                 <SongList :song-count="4" />

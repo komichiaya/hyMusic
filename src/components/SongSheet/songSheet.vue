@@ -1,28 +1,60 @@
 <!--  -->
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { DArrowRight as IconView } from '@element-plus/icons-vue'
-defineProps({
-    title: String
+import { PropType } from "vue"
+import { userStore } from "@/store/User/userInfo"
+const uS = userStore()
+const type = ref(0)
+type arr = {
+    id: number,
+    name: string,
+    description: string,
+    coverImgUrl: string,
+    picUrl: string,
+    creator: {
+        nickname: string
+    }
+    artist: {
+        name: string
+    }
+}
+const props = defineProps({
+    title: String,
+    songList: Array as PropType<arr[]>
 })
 const router = useRouter();
+const route = useRoute()
 const currentDate = ref(new Date())
-const toList = () => {
+onMounted(() => {
+    if (props.title == '音乐作品') {
+        type.value = 3
+    } else {
+        type.value = 0
+    }
+})
+const toList = (id: number, index: number) => {
     router.push({
         path: "/List",
         query: {
-            type: 0,
-            id: 123
+            type: type.value,
+            id,
+            index
         }
     })
 }
 const toUserPage = () => {
-    router.push({
-        name: "User",
-        params: {
-            id: 12333654
-        }
-    })
+    if (props.title == '用户歌单') {
+        router.push({
+            name: "User",
+            params: {
+                id: uS.userInfo.userId
+            }
+        })
+    } else if (props.title == "推荐歌单") {
+        console.log(1);
+    }
+
 }
 </script>
 <template>
@@ -40,15 +72,22 @@ const toUserPage = () => {
         <div>
             <el-col>
                 <div class="list">
-                    <div class="item" v-for="(item, index) in 5" :key='index'>
-                        <el-card :body-style="{ padding: '0px' }" @click="toList" style="cursor: pointer;">
-                            <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png"
-                                class="image" />
+                    <div class="item" v-for="(item, index) in songList" :key='item.id'>
+                        <el-card :body-style="{ padding: '0px' }" @click="toList(item.id, index
+                        )" style="cursor: pointer;">
+                            <el-image lazy :src="(item.coverImgUrl || item.picUrl) + '?param=300y300'" class="image">
+                                <template #placeholder>
+                                    <div class="image-slot">Loading
+                                        <span class="dot">...</span>
+                                    </div>
+                                </template>
+                            </el-image>
                             <div style="padding: 14px">
-                                <span>Yummy hamburger1</span>
+                                <div class="listTitle">
+                                    {{ item.name }}
+                                </div>
                                 <div class="bottom">
-                                    <time class="time">{{ currentDate }}</time>
-                                    <el-button text class="button">Operating</el-button>
+                                    <time class="nickname">@{{ item.creator?.nickname || item.artist?.name }}</time>
                                 </div>
                             </div>
                         </el-card>
@@ -63,23 +102,25 @@ const toUserPage = () => {
 
 <style scoped lang="less">
 /* @import url(); 引入css类 */
-.time {
-    font-size: 12px;
-    color: #999;
+.image-slot {
+    display: block;
+    widows: 200px;
+    height: 200px;
 }
 
-.bottom {
-    margin-top: 13px;
-    line-height: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.listTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 16px;
+    line-height: 1;
+    height: 32px;
 }
 
-.button {
-    padding: 0;
-    min-height: auto;
-}
+
+
 
 .image {
     width: 100%;
@@ -111,12 +152,21 @@ const toUserPage = () => {
         grid-template-columns: repeat(5, 1fr);
         gap: 44px 24px;
 
-        .b {
-            width: 100%;
-            height: 100%;
-            background-color: #fff;
-        }
 
+
+        .bottom {
+            margin-top: 13px;
+            line-height: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .nickname {
+                font-size: 12px;
+                color: #999;
+            }
+
+        }
 
     }
 

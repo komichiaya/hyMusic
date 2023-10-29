@@ -1,22 +1,28 @@
 <!--  -->
 <script setup lang="ts">
 import { useRouter } from "vue-router"
+import { PropType } from "vue"
+
 const circleUrl = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 const router = useRouter()
+type arr = { name: string, img1v1Url: string, id: number | string }
+
+const props = defineProps({
+    userFollows: Array as PropType<arr[]>
+})
 
 </script>
 <template>
     <div class="w">
         <div class="title">
-            推荐歌手:
+            你的关注:
         </div>
         <div class="averageList">
-            <el-card class="box-card" v-for="(item, index) in 6" :key="index" style="cursor: pointer;"
-                @click="() => router.push({ path: '/Singer', query: { type: 1, id: 1 } })">
-                <el-image style="border-radius: 50%;"
-                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+            <el-card class="box-card" v-for="(item, index) in userFollows" :key="index" style="cursor: pointer;"
+                @click="() => router.push({ path: '/Singer', query: { type: 1, id: item.id } })">
+                <el-image style="border-radius: 50%;" :src="item.img1v1Url" />
                 <div style="padding: 14px">
-                    <span>HY</span>
+                    <span>{{ item.name }}</span>
                 </div>
             </el-card>
 
