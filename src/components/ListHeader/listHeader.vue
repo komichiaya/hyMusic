@@ -14,6 +14,8 @@ const imgUrl = ref(computed(() => {
             return props.listHeaders.avatar
         case 3:
             return props.listHeaders.blurPicUrl
+        case 4:
+            return;
     }
 }))
 onMounted(() => {
@@ -27,18 +29,21 @@ onMounted(() => {
             </div>
             <div class="txt">
                 <div class="title">
-                    <p>{{ listHeaders.name }}</p>
+                    <p v-if="type == 4">每日日推</p>
+                    <p v-else>{{ listHeaders.name }}</p>
                 </div>
-                <div class="artist" v-if="!type">
-                    "Playlist by"
-                    <a href="#">
-                        {{ listHeaders.creator?.nickname }}
-                    </a>
+                <div class="artist" v-if="type == 0">
+                    <p>
+                        "Playlist by"
+                        <a href="#">
+                            {{ listHeaders.creator?.nickname }}
+                        </a>
+                    </p>
                 </div>
-                <div class="date" v-if="!type">
+                <div class="date" v-if="type == 0">
                     {{ moment(listHeaders.createTime).format("YYYY-MM-DD") }}创建
                 </div>
-                <div class="works" v-if="type">
+                <div class="works" v-if="type == 1">
                     <span>
                         <i class="iconfont icon-24gf-videoAlbum"></i>
                         {{ listHeaders.albumSize }}

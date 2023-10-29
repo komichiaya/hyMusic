@@ -1,10 +1,18 @@
 <script lang="ts" setup>
 
-import pic from "../../assets/wujing.jpg"
 import 'animate.css';
+import { useRouter } from "vue-router"
+import { userList } from '@/store/User/userList';
+const recommendPic = ref("")
+const myFMPic = ref("")
 const box: any = ref(null)
-onMounted(() => {
+const router = useRouter()
+const uL = userList()
 
+onMounted(async () => {
+    await uL.getUserRecommendSongsList();
+    recommendPic.value = (uL.recommendSongs[0] as any).al.picUrl + '?param==400y400'
+    myFMPic.value = (uL.myFm as any).picUrl + '?param==200y200'
 })
 const play = () => {
     alert("播放日推歌曲")
@@ -17,6 +25,14 @@ const myFMNestSong = () => {
     alert("FM下一首歌曲")
 
 }
+const toList = () => {
+    router.push({
+        path: '/List',
+        query: {
+            type: 4,
+        }
+    })
+}
 </script>
 <template>
     <div class="w">
@@ -24,8 +40,8 @@ const myFMNestSong = () => {
             为你推荐:
         </div>
         <div class="m">
-            <div class="recommendList " ref="box">
-                <img :src="pic" alt="" style="width: 100%;height: 600px;object-fit: cover;" />
+            <div class="recommendList " ref="box" @click="toList">
+                <img :src="recommendPic" alt="" style="width: 100%;height: 600px;object-fit: cover;" />
                 <div class="secondTitle">
                     <p>每日推荐</p>
                 </div>
@@ -33,7 +49,7 @@ const myFMNestSong = () => {
             </div>
             <div class="myFMList">
                 <div>
-                    <img :src="pic" alt="" style="width: 300px;height: 100%;object-fit: cover;" />
+                    <img :src="myFMPic" alt="" style="width: 300px;height: 100%;object-fit: cover;" />
                 </div>
                 <div class="secondTitle">
                     <p>私人FM</p>
@@ -72,6 +88,7 @@ const myFMNestSong = () => {
     }
 
     .recommendList {
+        cursor: pointer;
         height: 300px;
         position: relative;
         overflow: hidden;
@@ -138,6 +155,7 @@ const myFMNestSong = () => {
     }
 
     .myFMList {
+        cursor: pointer;
         height: 300px;
         position: relative;
         overflow: hidden;

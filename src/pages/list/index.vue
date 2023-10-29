@@ -46,6 +46,10 @@ onMounted(async () => {
             (list as any).value = [...aIF.albumInfo.songs]
             header.value = aIF.albumInfo.album
             break;
+        case 4:
+            (list as any).value = [...uL.recommendSongs]
+
+            break;
     }
     window.onbeforeunload = () => {
     }

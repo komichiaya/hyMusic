@@ -51,7 +51,8 @@ export const getUserSongList = (
       offset,
     },
   });
-export const getUserRecommendSong = () => http.get("/recommend/resource");
+export const getUserRecommendResource = () => http.get("/recommend/resource");
+export const getUserRecommendSongs = () => http.get("/recommend/songs");
 
 export const getUserSongListInfo = (
   id: number | string,
