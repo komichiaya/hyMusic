@@ -3,9 +3,10 @@
 import { songListInfo } from "@/store/SongList/songListInfo"
 import { userList } from "@/store/User/userList"
 import moment from "moment";
-
+import Calendar from "@/components/Calendar/index.vue"
 const props = defineProps(['type', 'listHeaders', 'listId'])
 const sLT = songListInfo()
+const days = ref(computed(() => new Date().getDate()))
 const imgUrl = ref(computed(() => {
     switch (props.type) {
         case 0:
@@ -25,8 +26,12 @@ onMounted(() => {
     <div class="h">
         <div class="m">
             <div class="pic">
-                <el-image style="width: 250px; height: 250px" :src="imgUrl + '?param=200y200'" />
+                <el-image style="width: 250px; height: 250px" :src="imgUrl + '?param=200y200'" v-if="props.type != 4" />
+                <div v-else>
+                    <Calendar> {{ days }}</Calendar>
+                </div>
             </div>
+
             <div class="txt">
                 <div class="title">
                     <p v-if="type == 4">每日日推</p>

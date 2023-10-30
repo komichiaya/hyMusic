@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     404: typeof import('./components/error/404/404.vue')['default']
     Album: typeof import('./components/Singer/album.vue')['default']
+    Calendar: typeof import('./components/Calendar/index.vue')['default']
     CardList: typeof import('./components/CardList/cardList.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAside: typeof import('element-plus/es')['ElAside']

@@ -25,13 +25,24 @@ const myFMNestSong = () => {
     alert("FM下一首歌曲")
 
 }
-const toList = () => {
-    router.push({
-        path: '/List',
-        query: {
-            type: 4,
-        }
-    })
+const toList = (type: number) => {
+    if (type) {
+        router.push({
+            path: '/List',
+            query: {
+                type: 0,
+                id: (uL.myFm as any).id
+            }
+        })
+    } else {
+        router.push({
+            path: '/List',
+            query: {
+                type: 4,
+            }
+        })
+    }
+
 }
 </script>
 <template>
@@ -40,19 +51,19 @@ const toList = () => {
             为你推荐:
         </div>
         <div class="m">
-            <div class="recommendList " ref="box" @click="toList">
+            <div class="recommendList " ref="box" @click="toList(0)">
                 <img :src="recommendPic" alt="" style="width: 100%;height: 600px;object-fit: cover;" />
                 <div class="secondTitle">
                     <p>每日推荐</p>
                 </div>
                 <i class="iconfont  icon-bofang" @click="play"></i>
             </div>
-            <div class="myFMList">
+            <div class="myFMList" @click="toList(1)">
                 <div>
                     <img :src="myFMPic" alt="" style="width: 300px;height: 100%;object-fit: cover;" />
                 </div>
                 <div class="secondTitle">
-                    <p>私人FM</p>
+                    <p>私人雷达</p>
                 </div>
                 <div class="controller">
                     <el-icon :size="60" style="margin-right: 10px;cursor: pointer;" @click="myFMPlay">
