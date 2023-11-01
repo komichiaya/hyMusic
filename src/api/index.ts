@@ -41,8 +41,8 @@ export const logout = () => http.get("/logout");
 
 export const getUserSongList = (
   uid: number | string,
-  limit: number = 30,
-  offset: number = 0
+  limit: number,
+  offset: number
 ) =>
   http.get("/user/playlist", {
     params: {
@@ -51,9 +51,15 @@ export const getUserSongList = (
       offset,
     },
   });
+export const getUserSubcount = () => http.get("/user/subcount");
 export const getUserRecommendResource = () => http.get("/recommend/resource");
 export const getUserRecommendSongs = () => http.get("/recommend/songs");
-
+export const getRecommendPlaylist = (limit: number) =>
+  http.get("/personalized", {
+    params: {
+      limit,
+    },
+  });
 export const getUserSongListInfo = (
   id: number | string,
   limit: number,
@@ -121,6 +127,14 @@ export const getArtistAlbumInfo = (id: string | number, limit: number) =>
   });
 export const getAlbumDetail = (id: string | number) =>
   http.get("/album", {
+    params: {
+      id,
+    },
+  });
+
+//
+export const getSongLyc = (id: string | number) =>
+  http.get("/lyric", {
     params: {
       id,
     },

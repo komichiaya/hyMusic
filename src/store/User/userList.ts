@@ -16,11 +16,7 @@ export const userList = defineStore("userList", {
     };
   },
   actions: {
-    async getUserList(
-      uid: number | string,
-      limit: number = 30,
-      offset: number = 0
-    ) {
+    async getUserList(uid: number | string, limit: number, offset: number) {
       const res = await getUserSongList(uid, limit, offset);
       if (res.code === 200) {
         this.playList = res.playlist;

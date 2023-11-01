@@ -62,6 +62,11 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/recommend",
+    name: "recommend",
+    component: () => import("../pages/recommend/index.vue"),
+  },
+  {
     redirect: "/Home",
     path: "/",
   },

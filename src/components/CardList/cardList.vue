@@ -2,36 +2,63 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
-defineProps({
+import type { PropType } from 'vue'
+
+interface songListType {
+    name: string
+    coverImgUrl: string,
+    picUrl: string,
+    id: number
+}
+const props = defineProps({
     type: String,
     typeNum: {
         type: Number,
         default: 0,
         require: true
+    },
+    songList: Array as PropType<songListType[]>,
+    limit: {
+        type: Number,
+        default: 0,
+        require: true
+    },
+    currentChange: {
+        type: Function,
+        // 不像对象或数组的默认，这不是一个
+        // 工厂函数。这会是一个用来作为默认值的函数
+        default() {
+            return 'Default function'
+        }
     }
 })
 const router = useRouter()
 const route = useRoute()
 const { width, height } = useWindowSize()
-const count = ref(6)
-const limit = ref(100)
-const nowLimit = ref(1)
-const currentChange = (e: number) => {
-    router.push({
-        path: `/search/${route.params.type}/search_list/limit=${nowLimit.value}`,
-        query: (route.query as any)
+const count = ref(5)
 
-    })
-}
+const nowLimit = ref(1)
+
 onMounted(() => {
     nowLimit.value = Number(route.params.limit) || 1
+
 })
+const toList = (id: number | string, index: number) => {
+    router.push({
+        path: "/list",
+        query: {
+            type: 0,
+            id,
+            index
+        }
+    })
+}
 watch([width.value, route],
     ([width, r], [preWidth, preR]) => {
         if (Number(width) >= 1920) {
             count.value = 8
         } else {
-            count.value = 6
+            count.value = 4
         }
         nowLimit.value = Number((r as any).params.limit)
     },
@@ -39,22 +66,19 @@ watch([width.value, route],
 </script>
 <template>
     <div class="m">
-        <div v-for="item in 24">
-            <el-card :body-style="{ padding: '15px' }">
+        <div v-for="(item, index) in songList">
+            <el-card :body-style="{ padding: '15px' }" @click="toList(item.id, index)" style="cursor: pointer;">
                 <div class="img">
-                    <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png"
-                        class="image" />
-
+                    <el-image :src="item.coverImgUrl || item.picUrl" class="image" lazy />
                 </div>
                 <div class="text">
-                    <p>Yummy hamburger</p>
-                    <p>Yummy hamburger</p>
+                    <p>{{ item.name }}</p>
                 </div>
             </el-card>
         </div>
-        <div class="foot">
-            <el-pagination layout="prev, pager, next" :page-count="limit" hide-on-single-page
-                v-model:current-page="nowLimit" @current-change="currentChange" />
+        <div class="foot" v-if="limit > 24">
+            <el-pagination layout="prev, pager, next" :page-count="Math.ceil((limit / 24))" hide-on-single-page
+                v-model:current-page="nowLimit" @current-change="(e) => currentChange(e)" />
         </div>
 
     </div>

@@ -8,10 +8,11 @@ const uL = userList()
 const uS = userStore()
 onMounted(() => {
     const id = uS.userInfo.userId
-    uL.getUserList(id)
+    uL.getUserList(id, 19, 0)
     uL.getUserRecommend()
     uS.getFollowsFriend(id)
     uS.getUserFollowArt(6)
+    uS.getSubcount()
 })
 </script>
 <template>

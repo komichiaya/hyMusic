@@ -69,8 +69,8 @@ watch([route, width],
     })
 </script>
 <template>
-    <div class="b">
-        <el-affix target=".b" :offset="60">
+    <div class="box">
+        <el-affix target=".box" :offset="60">
             <div class="h">
                 <el-check-tag v-for="(item, key) in  typeList" :key="key" @change="onClick(item.e, key)"
                     :checked="key == id ? true : false" style="margin-right:8px">
@@ -88,7 +88,7 @@ watch([route, width],
 
 <style scoped lang="less">
 /* @import url(); 引入css类 */
-.b {
+.box {
     .h {
         background-color: var(--el-bg-color);
         // background-color: #000;

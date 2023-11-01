@@ -3,8 +3,9 @@
 import SearchColumn from "../../components/SearchColumn/searchColumn.vue"
 import SongList from "../../components/SongList/songList.vue"
 import InfoCard from "../../components/InfoCard/infoCard.vue"
-
+import { userList } from "@/store/User/userList"
 const title = ['艺人', '播放清单', '专辑', '电台', '用户']
+const u = userList()
 </script>
 <template>
     <div class="m">
@@ -17,7 +18,7 @@ const title = ['艺人', '播放清单', '专辑', '电台', '用户']
             </div> -->
             <div class="songs">
                 <div class="title">歌曲</div>
-                <SongList :song-count="4" />
+                <SongList :songList="u.playList_less" />
             </div>
         </div>
         <div style="margin-top: 40px;">

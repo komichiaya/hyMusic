@@ -43,7 +43,7 @@ const toList = (id: number, index: number) => {
         }
     })
 }
-const toUserPage = () => {
+const morePage = () => {
     if (props.title == '用户歌单') {
         router.push({
             name: "User",
@@ -53,6 +53,10 @@ const toUserPage = () => {
         })
     } else if (props.title == "推荐歌单") {
         console.log(1);
+        router.push({
+            name: "recommend",
+
+        })
     }
 
 }
@@ -63,7 +67,7 @@ const toUserPage = () => {
             <div class="title">
                 {{ title }}:
             </div>
-            <el-link @click="toUserPage">
+            <el-link @click="morePage">
                 more<el-icon class="el-icon--right">
                     <DArrowRight />
                 </el-icon>

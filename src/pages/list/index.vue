@@ -30,7 +30,7 @@ onMounted(async () => {
     switch (Number(type.value)) {
         case 0:
             await sLT.getSongListInfo(ID.value)
-            await sLI.getSongListDetail(ID.value, 20, offset.value)
+            await sLI.getSongListAllSongs(ID.value, 20, offset.value)
             await sLI.getLikeSongIDList(id);
             (list as any).value = [...sLI.songList];
             header.value = sLT.songListDetail

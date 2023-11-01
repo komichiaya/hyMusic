@@ -7,6 +7,7 @@ import {
   logout,
   getUserFollows,
   getUserLikeArtists,
+  getUserSubcount,
 } from "@/api";
 
 export const userStore = defineStore("userStore", {
@@ -25,6 +26,10 @@ export const userStore = defineStore("userStore", {
       },
       userFollows: [],
       followArtists: [],
+      userSubcount: {
+        createdPlaylistCount: 0,
+        subPlaylistCount: 0,
+      },
     };
   },
   actions: {
@@ -88,6 +93,12 @@ export const userStore = defineStore("userStore", {
       if (res.code === 200) {
         this.followArtists = res.data;
       }
+    },
+    async getSubcount() {
+      const res = await getUserSubcount();
+      if (res.code === 200) {
+      }
+      this.userSubcount = { ...res };
     },
   },
   // gatters: {},

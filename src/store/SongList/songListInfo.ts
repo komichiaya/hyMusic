@@ -32,7 +32,7 @@ export const songListInfo = defineStore("songListInfo", {
     };
   },
   actions: {
-    async getSongListDetail(
+    async getSongListAllSongs(
       id: number | string,
       limit: number = 10,
       offset: number = 0
