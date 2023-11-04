@@ -10,7 +10,7 @@ import { ElMessage } from "element-plus"
 import { useElementSize } from '@vueuse/core'
 import { debounce } from "../../assets/tools"
 import { userStore } from "@/store/User/userInfo"
-
+import { getSearchHot } from "@/api"
 
 const el = ref(null)
 const { width, height } = useElementSize(el)
@@ -19,10 +19,13 @@ const router = useRouter();
 const search = ref("")
 const backType = ref((history.state as any).back)
 const forwardType = ref((history.state as any).forward)
-
+const hotSearchList = ref([])
 const visible = ref(false)
 const uS = userStore()
-
+onMounted(async () => {
+    const { result: { hots } } = await getSearchHot()
+    hotSearchList.value = (hots)
+})
 const userInputSearch = (e: any) => {
     debounce(() => {
         if (e.trim()) {
@@ -108,15 +111,26 @@ watch([route],
                 <div class="search">
                     <el-button size="large" :icon="HomeFilled" circle style='margin-right: 20px'
                         @click="router.push('/Home')" />
-                    <el-popover placement="bottom-start" :width="width" title="Title" :visible="visible">
+                    <el-popover placement="bottom-start" :width="width" :visible="visible" popper-class="popper">
                         <div>
-                            <ul>
-                                <li>1</li>
-                                <li>2</li>
-                                <li>3</li>
-                                <li>4</li>
-                                <li>5</li>
-                            </ul>
+                            <div class="history">
+                                <p>搜索历史</p>
+                                <ul>
+                                    <li>1</li>
+                                    <li>2</li>
+                                    <li>3</li>
+                                    <li>4</li>
+                                    <li>5</li>
+                                </ul>
+                            </div>
+                            <div class="dashed" />
+                            <div class="trending">
+                                <p>热搜榜</p>
+                                <ul v-for="item in hotSearchList">
+                                    <li>{{ item.first }}</li>
+                                </ul>
+                            </div>
+
                         </div>
                         <template #reference>
                             <el-input size="large" v-model="search" class="hidden-xs-only" placeholder="想听什么?" clearable
@@ -162,11 +176,25 @@ watch([route],
         width: 85%;
 
 
+
+
     }
+
+
 }
 
 .el-row {
     flex: 1;
     align-items: center;
 }
-</style>@/store/User/userInfo
+</style>
+<style lang="less">
+.popper {
+    background-color: #fff;
+
+    .dashed {
+        margin: 8px 0;
+        border-top: 2px dashed var(--el-border-color);
+    }
+}
+</style>

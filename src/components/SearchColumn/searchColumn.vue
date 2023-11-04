@@ -1,7 +1,47 @@
 <!--  -->
 <script setup lang="ts">
+import { useRouter } from "vue-router"
+const router = useRouter()
 const currentDate = ref(new Date())
+const props = defineProps(['songList', 'type'])
+const type = ref(computed(() => props.type))
 
+const toDetail = (id: number) => {
+    switch (type.value) {
+        case "artists":
+            router.push({
+                path: "/Singer",
+                query: {
+                    type: 1,
+                    id
+                }
+            }
+            )
+            break;
+        case "playLists":
+            router.push({
+                path: "/List",
+                query: {
+                    type: 0,
+                    id
+                }
+            }
+            )
+            break;
+        case "albums":
+            router.push({
+                path: "/Albums",
+                query: {
+                    type: 2,
+                    id
+                }
+            }
+            )
+            break;
+        case "users":
+            break;
+    }
+}
 </script>
 <template>
     <div class="m">
@@ -9,14 +49,13 @@ const currentDate = ref(new Date())
             <slot></slot>
         </div>
         <div class="list">
-            <el-card :body-style="{ padding: '0px' }" v-for="item in 5">
-                <div style="height: 300px;">
-                    <img src="https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png"
-                        class="image" />
+            <el-card :body-style="{ padding: '0px' }" v-for="item in songList">
+                <div style="height: 300px;" @click="toDetail(item.id)">
+                    <el-image :src="(item.picUrl || item.coverImgUrl || item.avatarUrl) + '?param=300y300'" class="image"
+                        lazy />
                 </div>
                 <div style="padding: 14px">
-                    <p>Yummy hamburger</p>
-                    <p>Yummy hamburger</p>
+                    <p>{{ item.name || item.nickname }}</p>
                 </div>
             </el-card>
         </div>
@@ -35,8 +74,8 @@ const currentDate = ref(new Date())
 
     .list {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 20px
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px
     }
 }
 

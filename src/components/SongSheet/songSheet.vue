@@ -28,14 +28,36 @@ const route = useRoute()
 const currentDate = ref(new Date())
 onMounted(() => {
     if (props.title == '音乐作品') {
-        type.value = 3
+        type.value = 2
     } else {
         type.value = 0
     }
 })
 const toList = (id: number, index: number) => {
+    const typeList = ["/List", "/Singer", "/Albums"]
+    let i = 0
+    switch (props.title) {
+        case "用户歌单":
+            i = 0;
+            break
+        case "用户歌单":
+            i = 0;
+            break;
+        case "推荐歌单":
+            i = 0;
+            break
+        case "音乐作品":
+            i = 2;
+            break;
+        case "专辑":
+            i = 3
+            break;
+        case "艺人":
+            i = 1;
+            break;
+    }
     router.push({
-        path: "/List",
+        path: typeList[i],
         query: {
             type: type.value,
             id,
@@ -52,7 +74,6 @@ const morePage = () => {
             }
         })
     } else if (props.title == "推荐歌单") {
-        console.log(1);
         router.push({
             name: "recommend",
 

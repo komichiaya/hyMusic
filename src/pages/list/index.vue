@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-// 0:歌单/专辑 1:歌手
+// 0:歌单 1:歌手 2:专辑 3：日推
 import listHeader from "@/components/ListHeader/listHeader.vue"
 import songList from "@/components/SongList/songList.vue";
 import Singer from "@/components/Singer/Singer.vue";
@@ -41,12 +41,12 @@ onMounted(async () => {
             (list as any).value = [...aIF.topSong];
             header.value = aIF.artistDetail.artist;
             break;
-        case 3:
+        case 2:
             await aIF.getAlbumInfo(ID.value);
             (list as any).value = [...aIF.albumInfo.songs]
             header.value = aIF.albumInfo.album
             break;
-        case 4:
+        case 3:
             (list as any).value = [...uL.recommendSongs]
 
             break;

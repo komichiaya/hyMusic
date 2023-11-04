@@ -38,7 +38,7 @@ const toList = (type: number) => {
         router.push({
             path: '/List',
             query: {
-                type: 4,
+                type: 3,
             }
         })
     }

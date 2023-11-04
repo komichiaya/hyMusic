@@ -139,3 +139,37 @@ export const getSongLyc = (id: string | number) =>
       id,
     },
   });
+
+export const getSearchHot = () => http.get("/search/hot");
+export const getSearchHotDetaile = () => http.get("/search/hot/detail");
+export const getSearchDefault = () => http.get("/search/default");
+export const getSearch = (
+  keywords: string,
+  limit: number = 30,
+  type: number = 1
+) =>
+  http.get("/search", {
+    params: {
+      keywords,
+      limit,
+      type,
+    },
+  });
+export const getCloudSearch = (
+  keywords: string,
+  limit: number = 30,
+  type: number = 1
+) =>
+  http.get("/cloudsearch", {
+    params: {
+      keywords,
+      limit,
+      type,
+    },
+  });
+export const getSearchMultimatch = (keywords: string) =>
+  http.get("/search/multimatch", {
+    params: {
+      keywords,
+    },
+  });

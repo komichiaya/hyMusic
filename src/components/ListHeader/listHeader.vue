@@ -13,9 +13,9 @@ const imgUrl = ref(computed(() => {
             return props.listHeaders.coverImgUrl
         case 1:
             return props.listHeaders.avatar
-        case 3:
+        case 2:
             return props.listHeaders.blurPicUrl
-        case 4:
+        case 3:
             return;
     }
 }))
