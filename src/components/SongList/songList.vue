@@ -3,15 +3,18 @@
 import { useRouter, useRoute } from "vue-router"
 import { songListInfo } from "@/store/SongList/songListInfo"
 import { userStore } from "@/store/User/userInfo"
+import { userList } from "@/store/User/userList"
 import { articInfoState } from '@/store/Artist/artistInfo';
+import { playStore } from "@/store/Play/"
 import moment from "moment"
 import { ElLoading } from 'element-plus'
-
 
 const router = useRouter()
 const route = useRoute()
 const sLI = songListInfo()
 const uS = userStore()
+const pS = playStore()
+const userListStore = userList()
 const aLF = articInfoState()
 const type = ref("")
 const listId = ref(0)
@@ -35,7 +38,7 @@ type mutationType = {
 }
 sLI.$subscribe((mutation, state) => {
     if ((mutation.events as any).newValue.length != (mutation.events as any).oldValue.length) {
-        console.log(1);
+        // console.log(1);
     }
 })
 onMounted(() => {
@@ -45,11 +48,11 @@ onMounted(() => {
 
 })
 onUnmounted(() => {
-    console.log(1);
+    // console.log(1);
 })
 
 const clickLog: any = ref([])
-const toPlay = (id: string | number) => {
+const toPlay = (id: string | number, index: number) => {
     //原理就是保留最后3次的点击时间戳，判断数组开头结尾的时间差是否在3000ms内
     clickLog.value.push((new Date()).getTime())
     if (clickLog.value.length > 3) {
@@ -58,9 +61,27 @@ const toPlay = (id: string | number) => {
     if (clickLog.value.length === 3) {
         if (clickLog.value[2] - clickLog.value[0] < 3000) {
             clickLog.value.splice(0, 3)
+            pS.pushHistoryList = true;
+
+            const type = route.query.type
+            switch (Number(type)) {
+                case 0:
+                    pS.historyList = sLI.songList;
+                    break;
+                case 1:
+                    pS.historyList = aLF.topSong;
+                    break;
+                case 2:
+                    pS.historyList = aLF.albumInfo.songs;
+                    break;
+                case 3:
+                    pS.historyList = userListStore.recommendSongs
+                    break;
+            }
             router.push({
                 path: "/Play", query: {
                     songId: id,
+                    index
                 }
             })
         }
@@ -100,7 +121,7 @@ watch(
 <template>
     <div class="songList" v-loading="loading">
         <div class="m" v-if="songList.length">
-            <el-row class="song" v-for="(item, index) in songList" :key="item.id" @click="toPlay(item.id)">
+            <el-row class="song" v-for="(item, index) in songList" :key="item.id" @click="toPlay(item.id, index)">
                 <el-col :span="4">
                     <div class="img">
                         <el-image style="width: 100%; height: 100%;

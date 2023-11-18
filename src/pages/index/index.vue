@@ -6,13 +6,13 @@ import { userList } from "@/store/User/userList"
 import { userStore } from '@/store/User/userInfo'
 const uL = userList()
 const uS = userStore()
-onMounted(() => {
+onMounted(async () => {
     const id = uS.userInfo.userId
-    uL.getUserList(id, 19, 0)
-    uL.getUserRecommend()
-    uS.getFollowsFriend(id)
-    uS.getUserFollowArt(6)
-    uS.getSubcount()
+    await uL.getUserList(id, 19, 0)
+    await uL.getUserRecommend()
+    await uS.getFollowsFriend(id)
+    await uS.getUserFollowArt(6)
+    await uS.getSubcount()
 })
 </script>
 <template>

@@ -5,7 +5,7 @@ export default {
 }
 </script>
 <script setup lang="ts" >
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import Ly from "lyric-parser"
 import { lrc } from "../../assets/lrc"
 import { ElScrollbar } from 'element-plus'
@@ -14,8 +14,10 @@ import pubsub from "pubsub-js"
 import { playStore } from "../../store/Play"
 import { storeToRefs } from "pinia"
 
+
+const router = useRouter()
 const pStore = playStore()
-const { currentRow: cR } = storeToRefs(pStore)
+const { currentRow: cR, songs } = storeToRefs(pStore)
 const rowOffset = 4
 const route = useRoute()
 const is404 = ref(false)
@@ -25,11 +27,8 @@ const lrcArr: (any) = ref([])
 const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
 const progressBar = ref(0)
-const sound = ref(0)
 const styleType = ref('hidden')
 const soundType = ref('hidden')
-const url =
-    'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
 const divHight = ref(0)
 const id = ref()
 const beginTime = ref("00:00")
@@ -39,6 +38,14 @@ const oTime = ref(moment(0, "S"))
 const isLeavePage = ref(false)
 const isSlide = ref(false)
 const isJump = ref(false)
+const nowID = ref()
+const ID = ref(0)
+const currentTime = ref(0)
+pStore.$subscribe((mutation, state) => {
+    const { lyricInfo } = state
+
+})
+
 const changeType = (show: boolean, type: number) => {
     switch (type) {
         case 1:
@@ -48,7 +55,7 @@ const changeType = (show: boolean, type: number) => {
             const oS = oTime.value.second()
             const oT = oM * 60 + oS
             const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
-            console.log(moment(t));
+            // console.log(moment(t));
             beginTime.value = moment(t).format('mm:ss')
             time.value = moment(t)
             isSlide.value = true;
@@ -56,7 +63,6 @@ const changeType = (show: boolean, type: number) => {
             if (!changePlayType.value) {
                 (songPlay as any).value.stop()
             }
-
             break;
         case 2:
             show ? soundType.value = 'visible' : soundType.value = 'hidden';
@@ -71,19 +77,16 @@ const changeType = (show: boolean, type: number) => {
 const show = () => {
     isShow.value = !isShow.value
 }
-const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
-    // currentRow.value = lineNum
-}
+
 const jump = (lineNum: number) => {
-    const t = (songPlay as any).value.lines[lineNum].time;
+    const t = (pStore.play as any).lines[lineNum].time;
     // (songPlay as any).value.seek(t);
     isJump.value = true;
     // clearInterval(id.value)
     pStore.changeCurrentRow(lineNum);
-    time.value = moment((songPlay as any).value.lines[lineNum].time)
+    time.value = moment(t)
     //play()
     pubsub.publish('jump1', lineNum)
-
 }
 
 /**
@@ -97,7 +100,6 @@ const cheack = () => {
         is404.value = true
     } else {
         is404.value = false
-
     }
 }
 const play = () => {
@@ -110,44 +112,72 @@ const play = () => {
         (songPlay as any).value.play()
     }
     changePlayType.value = true
-
-
 }
 const stop = () => {
     // alert('暂停播放');
-    (songPlay as any).value.stop()
+    // (songPlay as any).value.stop()
+    (pStore.play as any).stop()
     changePlayType.value = false
     clearInterval(id.value)
 }
 const move = (currentRow: any) => {
-    // console.log(currentRow);
     scrollbarRef.value!.setScrollTop((Number(currentRow) - rowOffset) * 40)
-
 }
 
-onMounted(() => {
-    beginTime.value = time.value.format("mm:ss")
-    overTime.value = oTime.value.minute(5).seconds(35).format("mm:ss")
+onMounted(async () => {
+    window.onbeforeunload = () => {
+        localStorage.setItem("ID", JSON.stringify(nowID.value))
+    }
     cheack()
-    songPlay.value = new Ly(lrc, lrcPlayFn)
-    lrcArr.value = (songPlay as any).value.lines
     setTimeout(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
 
 })
-onActivated(() => {
+
+onActivated(async () => {
     cheack()
-    move(pStore.currentRow)
     isLeavePage.value = false
+    const id = (computed(() => route.query.songId))
+    await pStore.getSongInfo(nowID.value || id.value)
+    await pStore.getSongLyric(nowID.value || id.value)
+    console.log(Number(id.value), Number(localStorage.getItem("ID")));
+    if (Number(id.value) != Number(localStorage.getItem("ID")) || pStore.audio.src == '') {
+        console.log("进来了")
+        if (JSON.stringify(pStore.play) != '{}') {
+            pStore.play.stop()
+        }
+        if (pStore.audio.src != '') {
+            (pStore.audio as any).pause();
+        }
+        pubsub.publish("initTime")
+        await pStore.getUrl(Number(id.value));
+        pStore.play = new Ly(pStore.lyricInfo.lrc.lyric, ({ lineNum, txt }: { lineNum: number, txt: any }) => {
+            cR.value = lineNum
+        })
+        pStore.audio = new Audio(pStore.songsInfo[0].url)
+        lrcArr.value = (pStore.play as any).lines
+        ID.value = nowID.value
+        beginTime.value = time.value.format("mm:ss")
+        overTime.value = moment((pStore.songs[0] as any).dt).format("mm:ss")
+        oTime.value = moment((pStore.songs[0] as any).dt)
+    }
+
+    pubsub.publish('play')
+    move(pStore.currentRow)
 
 })
 onDeactivated(() => {
     isLeavePage.value = true
-
+    const id = Number(route.query.songId)
+    ID.value = id
 })
+const chageType = () => {
+
+}
 const watchStop = watch([route, cR, beginTime],
     ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
+        nowID.value = newRoute.query.songId
         cheack()
         // console.log(currentNewRow, currentOldRow);
         if (!isLeavePage.value) {
@@ -161,12 +191,13 @@ const watchStop = watch([route, cR, beginTime],
         } else {
             // console.log(currentNewRow, currentOldRow);
         }
-        if (time.value >= oTime.value) {
-            stop()
-        }
+
     }
 
 )
+watchEffect(() => {
+
+})
 </script>
 <template>
     <div :style="{ height: (divHight - 180) + 'px' }" class="box">
@@ -174,7 +205,7 @@ const watchStop = watch([route, cR, beginTime],
             404
         </div>
         <div v-else>
-            <div style="width:90vw;height:100%">
+            <div style="width:90vw;height:100%" v-if="pStore.audio">
                 <el-container class="c">
                     <el-main style="width: 70%;" class="main">
                         <el-scrollbar height="400px" ref="scrollbarRef" wrap-style="scroll-behavior: smooth;">
@@ -187,6 +218,7 @@ const watchStop = watch([route, cR, beginTime],
                         </el-scrollbar>
                     </el-main>
                 </el-container>
+
             </div>
         </div>
     </div>

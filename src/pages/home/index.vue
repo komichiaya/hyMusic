@@ -20,8 +20,8 @@ watch(() => route.fullPath,
         <div style="padding:64px 5vw 96px; overflow-y: hidden; width: 100%;">
             <div>
                 <router-view v-slot="{ Component, route }">
-                    <keep-alive>
-                        <component :is="Component" :key="route.name" v-if="route.meta.keepAlive"></component>
+                    <keep-alive max="1">
+                        <component :is="Component" :key="route.query.songId" v-if="route.meta.keepAlive"></component>
                     </keep-alive>
                     <component :is="Component" :key="route.name" v-if="!route.meta.keepAlive"></component>
                 </router-view>

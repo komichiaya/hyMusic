@@ -26,7 +26,7 @@ onMounted(() => {
     <div class="h">
         <div class="m">
             <div class="pic">
-                <el-image style="width: 250px; height: 250px" :src="imgUrl + '?param=200y200'" v-if="props.type != 4" />
+                <el-image style="width: 250px; height: 250px" :src="imgUrl + '?param=200y200'" v-if="props.type != 3" />
                 <div v-else>
                     <Calendar> {{ days }}</Calendar>
                 </div>
@@ -34,7 +34,7 @@ onMounted(() => {
 
             <div class="txt">
                 <div class="title">
-                    <p v-if="type == 4">每日日推</p>
+                    <p v-if="type == 3">每日日推</p>
                     <p v-else>{{ listHeaders.name }}</p>
                 </div>
                 <div class="artist" v-if="type == 0">

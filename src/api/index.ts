@@ -37,6 +37,12 @@ export const getUserRefresh = () =>
       cookie: localStorage.getItem("userCookie"),
     },
   });
+export const userStatus = () =>
+  http.get("/login/status", {
+    params: {
+      timerstamp: new Date().getTime(),
+    },
+  });
 export const logout = () => http.get("/logout");
 
 export const getUserSongList = (
@@ -87,7 +93,12 @@ export const setUserLikeSong = (id: string | number, like: boolean) =>
       timerstamp: new Date().getTime(),
     },
   });
-
+export const getSongDetail = (ids: number | number[]) =>
+  http.get("/song/detail", {
+    params: {
+      ids,
+    },
+  });
 export const getSongListDetail = (id: number | string) =>
   http.get("/playlist/detail", {
     params: {
@@ -139,7 +150,17 @@ export const getSongLyc = (id: string | number) =>
       id,
     },
   });
-
+export const getSongUrl = (id: string | number, br: number = 999000) =>
+  http.get("/song/url", {
+    params: {
+      id,
+      br,
+    },
+  });
+export const getSongUrlNew = (
+  id: string | number,
+  level: string = "standard "
+) => http.get("/song/url/v1", { params: { id, level } });
 export const getSearchHot = () => http.get("/search/hot");
 export const getSearchHotDetaile = () => http.get("/search/hot/detail");
 export const getSearchDefault = () => http.get("/search/default");

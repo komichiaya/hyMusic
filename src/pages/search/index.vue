@@ -1,6 +1,7 @@
 <!--  -->
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
+
 import { useWindowSize } from "@vueuse/core"
 const { width } = useWindowSize()
 const w = ref(width.value + 'px')
@@ -8,24 +9,24 @@ const router = useRouter()
 const route = useRoute()
 const checked = ref(false)
 const typeList = ref([{
-    c: '所有', e: "all"
+    c: '所有', e: "all", t: 1018
 }, {
-    c: '歌曲', e: "song"
-}, { c: '艺人', e: 'singer' }, {
-    c: '播放清单', e: 'list'
+    c: '歌曲', e: "song", t: 1
+}, { c: '艺人', e: 'singer', t: 100 }, {
+    c: '播放清单', e: 'list', t: 1000
 }, {
-    c: '专辑', e: "album"
+    c: '专辑', e: "album", t: 10
 }, {
-    c: '电台', e: "fm"
+    c: '电台', e: "fm", t: 1009
 }, {
-    c: '用户', e: 'user'
-},])
+    c: '用户', e: 'user', t: 1002
+}])
 const id: any = ref(null)
 const t = ref('')
 const onClick = (type: string, key: number) => {
     id.value = key
     t.value = type == 'all' ? 'all' : 'other'
-
+    console.log(type)
     switch (t.value) {
         case 'all':
             router.push({
@@ -37,11 +38,14 @@ const onClick = (type: string, key: number) => {
             })
             break;
         case 'other':
+
+            const t1 = typeList.value.filter((item) => item.e == type)
+            console.log(t1);
             router.push({
                 path: `/search/${type}/search_list/limit=1`,
                 query: {
                     s: route.query.s,
-                    type: key
+                    type: t1[0].t
                 }
             })
             break;

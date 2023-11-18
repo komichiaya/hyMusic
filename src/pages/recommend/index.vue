@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import CardList from "@/components/CardList/cardList.vue"
-import { userList } from "@/store/User/userlist"
+import { userList } from "@/store/User/userList"
 const userListStore = userList()
 const currentChange = (e) => { }
 const songList = ref(computed(() => userListStore.recommendList))

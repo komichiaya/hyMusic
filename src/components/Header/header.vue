@@ -22,6 +22,8 @@ const forwardType = ref((history.state as any).forward)
 const hotSearchList = ref([])
 const visible = ref(false)
 const uS = userStore()
+const historyList: any = ref([])
+
 onMounted(async () => {
     const { result: { hots } } = await getSearchHot()
     hotSearchList.value = (hots)
@@ -44,6 +46,10 @@ const userFocusInput = () => {
 const userEnterSearch = (e: any) => {
     visible.value = false
     if (search.value.trim()) {
+        const arr = historyList.value
+        arr.unshift(search.value)
+        const list = new Set(arr)
+        historyList.value = [...list]
         router.push({
             path: "/search/all/search_all",
             query: {
@@ -63,6 +69,19 @@ const loginOut = async () => {
         })
     }
     location.reload()
+}
+const clickTag = (s: string) => {
+    search.value = s
+    visible.value = false
+    if (s.trim()) {
+        router.push({
+            path: "/search/all/search_all",
+            query: {
+                s,
+                type: "0"
+            }
+        })
+    }
 }
 watch([route],
     () => {
@@ -115,13 +134,10 @@ watch([route],
                         <div>
                             <div class="history">
                                 <p>搜索历史</p>
-                                <ul>
-                                    <li>1</li>
-                                    <li>2</li>
-                                    <li>3</li>
-                                    <li>4</li>
-                                    <li>5</li>
-                                </ul>
+                                <el-tag round v-for="tag in historyList" :key="tag" class="mx-1" closable
+                                    @click="clickTag(tag)" style="cursor: pointer;">
+                                    {{ tag }}
+                                </el-tag>
                             </div>
                             <div class="dashed" />
                             <div class="trending">

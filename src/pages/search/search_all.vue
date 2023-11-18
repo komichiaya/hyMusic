@@ -24,13 +24,21 @@ const u = userList()
 const route = useRoute()
 const keywords = ref()
 const Search = SearchStroe()
-onMounted(async () => {
+
+onMounted(() => {
+
+    console.log(1);
     keywords.value = route.query.s
-    await Search.getSearchMore(keywords.value, 30, 1018)
+    search(keywords.value)
 })
+const search = async (keywords: string) => {
+    await Search.getSearchMore(keywords, 30, 1018)
+}
 watch(() => route.query,
     (a, b) => {
-        console.log(a.query);
+        if (a.s) {
+            search(String(a.s))
+        }
     })
 </script>
 <template>

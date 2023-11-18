@@ -14,8 +14,14 @@ import moment from 'moment'
 import pubsub from "pubsub-js"
 import { playStore } from "../../store/Play"
 import { storeToRefs } from "pinia";
+import { songListInfo } from "@/store/SongList/songListInfo"
+import { debounce } from "@/assets/tools"
+
+
+
 const store = playStore()
-const { currentRow: cR } = storeToRefs(store)
+const songListStore = songListInfo()
+const { currentRow: cR, songs } = storeToRefs(store)
 const rowOffset = 4
 const route = useRoute()
 const is404 = ref(false)
@@ -26,11 +32,10 @@ const currentRow = ref(-1)
 const songPlay = ref(null)
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>()
 const progressBar = ref(0)
-const sound = ref(0)
+const sound = ref(50)
 const styleType = ref('hidden')
 const soundType = ref('hidden')
-const url =
-    'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+
 const divHight = ref(0)
 const id = ref()
 const beginTime = ref("00:00")
@@ -42,10 +47,30 @@ const isSlide = ref(false)
 const isJump = ref(false)
 const drawer1 = ref(false)
 const active = ref(false)
-
+const audio = ref(null)
+const loopType = ref(true)
 const n_drawer = ref(null)
 const { width, height } = useElementSize(n_drawer)
+const info: any = ref({})
+const index = ref(0)
+const showBtnType = ref(true)
+store.$subscribe((mutation, state) => {
+    // console.log(mutation, state)
+    const { al, name, ar, dt }: any = state.songs[0]
+    const { audio, newAudio, oldAudio, historyList }: any = state
+    info.value = { al, name, ar, dt }
+    oTime.value = moment(dt)
+    overTime.value = moment(dt).format("mm:ss");
+    audio.volume = sound.value * 0.01
+    newAudio.volume = sound.value * 0.01
+    oldAudio.volume = sound.value * 0.01
+    if (audio.src) {
+        showBtnType.value = false
+    } else {
+        showBtnType.value = true
 
+    }
+})
 
 const toPlayPage = (songId: number) => {
     router.push(`/Play?songId=${songId}`)
@@ -58,7 +83,6 @@ const clo = () => {
 }
 
 const changeType = (show: boolean, type: number) => {
-    console.log(type)
     switch (type) {
         case 1:
             // console.log(oTime.value.format("mm:ss"));
@@ -67,18 +91,21 @@ const changeType = (show: boolean, type: number) => {
             const oS = oTime.value.second()
             const oT = oM * 60 + oS
             const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
-            console.log(moment().millisecond(t));
+            // console.log(moment().millisecond(t));
             beginTime.value = moment(t).format('mm:ss')
             time.value = moment(t)
             isSlide.value = true;
-            (songPlay as any).value.seek(t)
+            (store.play as any).seek(t);
+            store.audio.currentTime = t / 1000
             if (!changePlayType.value) {
-                (songPlay as any).value.stop()
+                (store.play as any).stop()
             }
-
             break;
         case 2:
             show ? soundType.value = 'visible' : soundType.value = 'hidden';
+            if (store.audio.src != '') {
+                store.audio.volume = sound.value * 0.01
+            }
             break;
         default:
             styleType.value = 'hidden';
@@ -94,14 +121,13 @@ const lrcPlayFn = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
     currentRow.value = lineNum
 }
 const jump = pubsub.subscribe('jump1', (name: string, lineNum: number) => {
-    console.log((songPlay as any).value.lines[lineNum].time)
-    const t = (songPlay as any).value.lines[lineNum].time;
-    (songPlay as any).value.seek(t);
+    // console.log((store.play as any).lines[lineNum].time)
+    const t = (store.play as any).lines[lineNum].time;
+    (store.play as any).seek(t);
     isJump.value = true;
     clearInterval(id.value)
-    time.value = moment((songPlay as any).value.lines[lineNum].time)
+    time.value = moment(t)
     play()
-
 })
 
 /**
@@ -118,7 +144,10 @@ const cheack = () => {
 
     }
 }
-const play = () => {
+const play = async () => {
+    if (id.value) {
+        clearInterval(id.value)
+    }
     id.value = setInterval(() => {
         beginTime.value = time.value.add(1, 's').format("mm:ss")
         const m = time.value.minute() * 60
@@ -128,66 +157,165 @@ const play = () => {
         progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
     }, 1000);
     if (isSlide.value) {
-        (songPlay as any).value.togglePlay()
+        (store.play as any).togglePlay();
+        store.audio.play();
         isSlide.value = false
     } else if (isJump.value) {
-        (songPlay as any).value.seek((songPlay as any).value.lines[currentRow.value + 1].time)
+        // console.log((store.play as any).lines[cR.value + 1].time / 10, '(store.play as any).lines[cR.value + 1].time');
+        (store.play as any).seek((store.play as any).lines[cR.value + 1].time);
+        store.audio.currentTime = (store.play as any).lines[cR.value + 1].time / 1000
+        store.audio.play()
         isJump.value = false
     }
     else {
-        (songPlay as any).value.play()
+        store.audio.volume = sound.value * 0.01;
+        // console.log(store.audio.currentTime * 1000);
+        (store.play as any).seek(store.audio.currentTime * 1000);
+        store.audio.play()
+        store.isPlay = true
+    }
+    changePlayType.value = true;
+    const a = index.value + 1
+    const length = store.historyList.length
+    const i = a >= length ? a - length : a
+    if (length) {
+        await store.getUrl(store.historyList[i].id, undefined, undefined, "new")
+        await store.getUrl(store.historyList.at(index.value - 1).id, undefined, undefined, "old")
+        store.newAudio = new Audio(store.newSongsInfo[0].url)
+        store.oldAudio = new Audio()
+    } else {
+        store.pushHistoryList = true;
+        store.historyList.push(store.songs[0])
 
     }
-    changePlayType.value = true
-
 
 }
+pubsub.subscribe('play', play)
+
 const stop = () => {
-    (songPlay as any).value.stop()
+    (store.audio as any).pause();
+    (store.play as any).stop();
     changePlayType.value = false
     clearInterval(id.value)
 }
-
+const pause = () => {
+    (store.audio as any).pause();
+    (store.play as any).stop();
+    changePlayType.value = false
+    // isSlide.value = true
+    clearInterval(id.value)
+}
 
 onMounted(() => {
     beginTime.value = time.value.format("mm:ss")
-    overTime.value = oTime.value.minute(5).seconds(35).format("mm:ss")
+    if (songs.value.length) {
+        oTime.value = moment(info.value.dt)
+        overTime.value = moment(info.value.dt).format("mm:ss")
+    } else {
+        overTime.value = oTime.value.minute(0).seconds(0).format("mm:ss")
+    }
     cheack()
-    songPlay.value = new Ly(lrc, lrcPlayFn)
-    lrcArr.value = (songPlay as any).value.lines
+    // songPlay.value = new Ly(store.lyricInfo.lrc.lyric, lrcPlayFn)
+    lrcArr.value = (store.play as any).lines
     setTimeout(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
 })
+const previousSong = () => {
+    stop()
+    initTime()
+    store.audio = store.oldAudio
+    router.replace({
+        path: "/Play",
+        query: {
+            songId: store.historyList.at(index.value - 1).id,
+            index: index.value - 1 < 0 ? index.value - 1 + store.historyList.length : index.value - 1
+        }
+    });
 
-const watchStop = watch([route, currentRow, beginTime],
-    ([newRoute, currentNewRow, newBeginTime], [oldRoute, currentOldRow, oldBeginTime]) => {
+}
+const nextSong = () => {
+    stop()
+    initTime()
+    store.audio = store.newAudio
+    const a = index.value + 1
+    const length = store.historyList.length
+    const i = a >= length ? a - length : a
+    router.replace({
+        path: "/Play",
+        query: {
+            songId: store.historyList[i].id,
+            index: i
+        }
+    });
+
+}
+const loop = () => {
+    console.log(123)
+    nextSong()
+}
+const initTime = () => {
+    time.value = moment(0)
+    beginTime.value = time.value.format("mm:ss")
+}
+pubsub.subscribe("initTime", initTime)
+const watchStop = watch([route, beginTime, store],
+    ([newRoute, newBeginTime, newStore], [oldRoute, oldBeginTime, oldStore]) => {
+        index.value = Number(newRoute.query.index);
         cheack()
         // console.log(currentNewRow, currentOldRow);
-        store.changeCurrentRow(currentRow.value)
-        if (time.value >= oTime.value) {
-            console.log(1)
-            stop()
+        // store.changeCurrentRow(currentRow.value)
+        if (time.value.unix() == oTime.value.unix()) {
+            if (JSON.stringify(store.play) != '{}') {
+                nextSong()
+            }
         }
-    }
+        if (songs.value.length) {
+            oTime.value = moment((songs.value[0] as any).dt)
+            overTime.value = moment((songs.value[0] as any).dt).format("mm:ss")
+        }
+        /*   store.audio.addEventListener('ended', function (e) {
+               const { isTrusted } = e
+               console.log(isTrusted);
+               if (isTrusted) {
+                   if (loopType.value) {
+                       loop()
+                   } else {
+                       console.log("stop");
+                       stop()
+                   }
+               }
+           })*/
+
+    },
+    { deep: true }
 
 )
-
 </script>
 <template>
-    <div>
+    <div v-if="JSON.stringify(info) != ''">
         <el-row class='f'>
             <el-col :span="8" class="album">
-                <div class="albumPic" @click="toPlayPage(1)">
-                    <el-image style="width: 100%; height: 100%" :src="url" fit="fill" />
+                <div class="albumPic" @click="toPlayPage(Number(route.query.songId))" v-if="Object.hasOwn(info, 'al')">
+                    <el-image style="width: 100%; height: 100%" :src="info.al.picUrl" fit="fill" />
                 </div>
                 <div class="albumInfo">
-                    <div @click="toPlayPage(1)" style="cursor: pointer;">
-                        <span>等天亮</span>
+                    <div @click="router.push({
+                        path: '/Albums', query: {
+                            id: Number(info.al.id),
+                            type: 2
+                        }
+                    })" style="cursor: pointer;">
+                        <span>{{ info.name }}</span>
                     </div>
-                    <div>
-                        <div @click="router.push(`/List?type=1`)" style="cursor: pointer;">
-                            <span>TTTianll</span>
+                    <div v-for='item in info.ar '>
+                        <div @click="router.push({
+                            path: '/Singer', query: {
+                                id: item.id,
+                                type: 1
+                            }
+                        })" style="cursor: pointer;">
+                            <span>{{ item.name }}</span>
                         </div>
                     </div>
 
@@ -196,22 +324,24 @@ const watchStop = watch([route, currentRow, beginTime],
             <el-col :span="8">
                 <div style="display: flex;flex-direction: column;flex-wrap: nowrap;align-content: center;">
                     <div class="btngroup">
-                        <el-button type="primary" circle color="#000">
+                        <el-button type="primary" circle color="#000" @click="previousSong" :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-29_shangyiji"></i>
                             </el-icon>
                         </el-button>
-                        <el-button type="primary" circle color="#000" size="large" @click="play" v-if="!changePlayType">
+                        <el-button type="primary" circle color="#000" size="large" @click="play" v-if="!changePlayType"
+                            :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-27_bofang"></i>
                             </el-icon>
                         </el-button>
-                        <el-button type="primary" circle color="#000" size="large" @click="stop" v-if="changePlayType">
+                        <el-button type="primary" circle color="#000" size="large" @click="pause" v-if="changePlayType"
+                            :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-28_bofang"></i>
                             </el-icon>
                         </el-button>
-                        <el-button type="primary" circle color="#000">
+                        <el-button type="primary" circle color="#000" @click="nextSong" :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-30_xiayiji"></i>
                             </el-icon>
@@ -270,7 +400,6 @@ const watchStop = watch([route, currentRow, beginTime],
                         <div class="darwer_h">
                             <div class="title">
                                 播放列表
-
                             </div>
                             <div class="closeBtn">
                                 <el-button @click='clo'>X</el-button>
@@ -279,13 +408,12 @@ const watchStop = watch([route, currentRow, beginTime],
                     </template>
                     <n-scrollbar>
                         <div class="demo">
-                            <songList :songCount="10" />
+                            <songList v-if="store.pushHistoryList" :songList="store.historyList" />
                         </div>
                     </n-scrollbar>
                 </n-drawer-content>
             </n-drawer>
         </n-config-provider>
-
     </div>
 </template>
 <style lang="less">

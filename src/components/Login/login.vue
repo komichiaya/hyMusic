@@ -30,8 +30,10 @@ uS.$subscribe((mutation: any, state: any) => {
             message: '登录成功',
             type: 'success',
         })
+        location.reload()
 
-
+    } else {
+        dialogVisible.value = true
     }
 })
 const handleClick = async (tab: TabsPaneContext, event: Event) => {

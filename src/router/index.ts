@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { store } from "../store";
+import { userStore } from "@/store/User/userInfo";
+import { userStatus } from "@/api";
 const routes: RouteRecordRaw[] = [
   {
     name: "Home",
@@ -28,7 +29,7 @@ const routes: RouteRecordRaw[] = [
   {
     name: `Play`,
     path: "/Play",
-    props: r => ({ songId: r.query.songId }),
+    props: r => ({ songId: r.query.songId, index: r.query.index }),
     component: () => import("../pages/Play/index.vue"),
     meta: {
       keepAlive: true,
@@ -85,14 +86,19 @@ const router = createRouter({
     return { top: 0 };
   },
 });
-// router.beforeEach(async (to, from) => {
-//   const s = store();
-//   if (to.path == "/Play" || from.path == "/Play") {
-//     if (to.path == "/Play" && from.path == "/Play") {
-//       return;
-//     } else {
-//        s.chageShowFooterType();
-//     }
-//   }
-// });
+router.beforeEach(async (to, from) => {
+  if (from.path == "/Play") {
+    localStorage.setItem("ID", String(from.query.songId));
+  }
+});
+router.beforeResolve(async to => {
+  const s = userStore();
+  const res = await userStatus();
+  if (res.code == 200) {
+    const { anonimousUser } = res.account;
+    if (anonimousUser) {
+      s.isLogin = false;
+    }
+  }
+});
 export default router;
