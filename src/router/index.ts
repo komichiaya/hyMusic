@@ -43,11 +43,12 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: "search_all",
+        name: "Search_all",
         component: () => import("../pages/search/search_all.vue"),
       },
       {
-        path: "search_list/limit=:limit",
-        props: r => ({ limit: r.params.limit }),
+        path: "search_list",
+        name: "Search_list",
         component: () => import("../pages/search/search_list.vue"),
       },
     ],

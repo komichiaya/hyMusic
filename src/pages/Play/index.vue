@@ -46,37 +46,6 @@ pStore.$subscribe((mutation, state) => {
 
 })
 
-const changeType = (show: boolean, type: number) => {
-    switch (type) {
-        case 1:
-            // console.log(oTime.value.format("mm:ss"));
-            show ? styleType.value = 'visible' : styleType.value = 'hidden';
-            const oM = oTime.value.minute()
-            const oS = oTime.value.second()
-            const oT = oM * 60 + oS
-            const t = Number(moment.duration(oT, 'seconds').valueOf()) * (progressBar.value / 100)
-            // console.log(moment(t));
-            beginTime.value = moment(t).format('mm:ss')
-            time.value = moment(t)
-            isSlide.value = true;
-            (songPlay as any).value.seek(t)
-            if (!changePlayType.value) {
-                (songPlay as any).value.stop()
-            }
-            break;
-        case 2:
-            show ? soundType.value = 'visible' : soundType.value = 'hidden';
-            break;
-        default:
-            styleType.value = 'hidden';
-            soundType.value = 'hidden';
-            break;
-    }
-
-}
-const show = () => {
-    isShow.value = !isShow.value
-}
 
 const jump = (lineNum: number) => {
     const t = (pStore.play as any).lines[lineNum].time;
@@ -102,28 +71,11 @@ const cheack = () => {
         is404.value = false
     }
 }
-const play = () => {
-    if (isSlide.value) {
-        (songPlay as any).value.togglePlay()
-    } else if (isJump.value) {
-        (songPlay as any).value.seek((songPlay as any).value.lines[cR.value + 1].time)
-    }
-    else {
-        (songPlay as any).value.play()
-    }
-    changePlayType.value = true
-}
-const stop = () => {
-    // alert('暂停播放');
-    // (songPlay as any).value.stop()
-    (pStore.play as any).stop()
-    changePlayType.value = false
-    clearInterval(id.value)
-}
+
 const move = (currentRow: any) => {
     scrollbarRef.value!.setScrollTop((Number(currentRow) - rowOffset) * 40)
 }
-
+pubsub.subscribe('move', move)
 onMounted(async () => {
     window.onbeforeunload = () => {
         localStorage.setItem("ID", JSON.stringify(nowID.value))
@@ -152,9 +104,7 @@ onActivated(async () => {
         }
         pubsub.publish("initTime")
         await pStore.getUrl(Number(id.value));
-        pStore.play = new Ly(pStore.lyricInfo.lrc.lyric, ({ lineNum, txt }: { lineNum: number, txt: any }) => {
-            cR.value = lineNum
-        })
+        pStore.play = new Ly(pStore.lyricInfo.lrc.lyric, demo)
         pStore.audio = new Audio(pStore.songsInfo[0].url)
         lrcArr.value = (pStore.play as any).lines
         ID.value = nowID.value
@@ -167,6 +117,9 @@ onActivated(async () => {
     move(pStore.currentRow)
 
 })
+const demo = ({ lineNum, txt }: { lineNum: number, txt: any }) => {
+    cR.value = lineNum
+}
 onDeactivated(() => {
     isLeavePage.value = true
     const id = Number(route.query.songId)

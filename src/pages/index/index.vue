@@ -13,6 +13,8 @@ onMounted(async () => {
     await uS.getFollowsFriend(id)
     await uS.getUserFollowArt(6)
     await uS.getSubcount()
+    await uL.getUserRecommendSongsList();
+
 })
 </script>
 <template>

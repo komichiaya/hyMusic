@@ -44,10 +44,24 @@ onMounted(() => {
 
 })
 const toList = (id: number | string, index: number) => {
+    // 0:歌单 1:歌手 2:专辑 3：日推
+    const type = Number(route.query.type)
+    let t;
+    switch (type) {
+        case 10:
+            t = 2
+            break;
+        case 100:
+            t = 1
+            break;
+        case 1000:
+            t = 0
+            break;
+    }
     router.push({
         path: "/list",
         query: {
-            type: 0,
+            type: t,
             id,
             index
         }

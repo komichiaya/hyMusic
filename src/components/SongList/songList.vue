@@ -22,8 +22,15 @@ const offset = ref(0)
 const isLike = ref(false)
 const loading = ref(false)
 const list: any = ref([])
+const imgMark = ref(true)
 interface Props {
-    songList: { id: number; al: { picUrl: string; name: string; }; name: string; ar: [{ name: string; id: number; }]; dt: number; }[],
+    songList: {
+        id: number;
+        al: { picUrl: string; name: string; };
+        name: string;
+        ar: [{ name: string; id: number; }];
+        dt: number;
+    }[],
     showLikeBtn?: {
         type: boolean,
         default: true,
@@ -124,9 +131,8 @@ watch(
             <el-row class="song" v-for="(item, index) in songList" :key="item.id" @click="toPlay(item.id, index)">
                 <el-col :span="4">
                     <div class="img">
-                        <el-image style="width: 100%; height: 100%;
-                        border: 1px solid transparent;border-radius: 10px;" :src="item.al.picUrl + '?param=200y200'"
-                            lazy />
+                        <el-image style="width: 100%; height: 100%;  border: 1px solid transparent;border-radius: 10px;"
+                            :src="item.al.picUrl + '?param=200y200'" lazy />
                     </div>
                 </el-col>
                 <el-col :span="7">

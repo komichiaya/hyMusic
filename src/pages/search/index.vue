@@ -26,7 +26,6 @@ const t = ref('')
 const onClick = (type: string, key: number) => {
     id.value = key
     t.value = type == 'all' ? 'all' : 'other'
-    console.log(type)
     switch (t.value) {
         case 'all':
             router.push({
@@ -38,14 +37,13 @@ const onClick = (type: string, key: number) => {
             })
             break;
         case 'other':
-
             const t1 = typeList.value.filter((item) => item.e == type)
-            console.log(t1);
             router.push({
-                path: `/search/${type}/search_list/limit=1`,
+                path: `/search/${type}/search_list`,
                 query: {
                     s: route.query.s,
-                    type: t1[0].t
+                    type: t1[0].t,
+                    limit: 1
                 }
             })
             break;
@@ -57,9 +55,7 @@ const onClick = (type: string, key: number) => {
                     type: key
                 }
             })
-
     }
-
 }
 onMounted(() => {
     t.value = String(route.params.type)

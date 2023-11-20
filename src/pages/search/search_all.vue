@@ -26,23 +26,24 @@ const keywords = ref()
 const Search = SearchStroe()
 
 onMounted(() => {
-
-    console.log(1);
+    console.log('onMounted')
     keywords.value = route.query.s
     search(keywords.value)
 })
 const search = async (keywords: string) => {
     await Search.getSearchMore(keywords, 30, 1018)
 }
-watch(() => route.query,
-    (a, b) => {
-        if (a.s) {
-            search(String(a.s))
-        }
-    })
+// watch(() => route,
+//     (a, b) => {
+//         if (a.name == 'Search_all') {
+//             search(String(a.query.s))
+//         }
+//         console.log(a.query, a.path);
+//     },
+//     { deep: true, })
 </script>
 <template>
-    <div class="m" v-if="Search.searchResList.length">
+    <div class="m" v-if="Search.searchList.length">
         <div class="t">
 
             <!-- <div class="popular">
@@ -52,13 +53,13 @@ watch(() => route.query,
             </div> -->
             <div class="songs">
                 <div class="title">歌曲</div>
-                <SongList :songList="Search.searchResList[0].songs" />
+                <SongList :songList="Search.searchList[0].songs" />
             </div>
         </div>
         <div style="margin-top: 40px;" v-if="title.length">
             <div v-for="(item, index) in title">
                 <SearchColumn
-                    :songList="Search.searchResList[(index + 1 > Search.searchResList.length) ? index : index + 1][item.type]"
+                    :songList="Search.searchList[(index + 1 > Search.searchList.length) ? index : index + 1][item.type]"
                     :type="item.type">
                     {{ item.name }}
                 </SearchColumn>

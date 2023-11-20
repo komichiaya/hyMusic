@@ -156,6 +156,7 @@ const play = async () => {
         const oS = oTime.value.second()
         progressBar.value = Number(((m + s) / (oM + oS)).toFixed(4)) * 100
     }, 1000);
+    store.audio.volume = sound.value * 0.01;
     if (isSlide.value) {
         (store.play as any).togglePlay();
         store.audio.play();
@@ -168,7 +169,6 @@ const play = async () => {
         isJump.value = false
     }
     else {
-        store.audio.volume = sound.value * 0.01;
         // console.log(store.audio.currentTime * 1000);
         (store.play as any).seek(store.audio.currentTime * 1000);
         store.audio.play()
@@ -179,14 +179,15 @@ const play = async () => {
     const length = store.historyList.length
     const i = a >= length ? a - length : a
     if (length) {
-        await store.getUrl(store.historyList[i].id, undefined, undefined, "new")
-        await store.getUrl(store.historyList.at(index.value - 1).id, undefined, undefined, "old")
-        store.newAudio = new Audio(store.newSongsInfo[0].url)
-        store.oldAudio = new Audio()
+        if (length != 1) {
+            await store.getUrl(store.historyList[i].id, undefined, undefined, "new")
+            await store.getUrl(store.historyList.at(index.value - 1).id, undefined, undefined, "old")
+            store.newAudio = new Audio(store.newSongsInfo[0].url)
+            store.oldAudio = new Audio()
+        }
     } else {
         store.pushHistoryList = true;
         store.historyList.push(store.songs[0])
-
     }
 
 }
@@ -221,38 +222,52 @@ onMounted(() => {
         divHight.value = document.getElementById("scrollbar")?.clientHeight || 0
     })
 })
-const previousSong = () => {
-    stop()
-    initTime()
-    store.audio = store.oldAudio
-    router.replace({
-        path: "/Play",
-        query: {
-            songId: store.historyList.at(index.value - 1).id,
-            index: index.value - 1 < 0 ? index.value - 1 + store.historyList.length : index.value - 1
-        }
-    });
 
-}
-const nextSong = () => {
+
+const changeSong = (type: number) => {
     stop()
     initTime()
-    store.audio = store.newAudio
-    const a = index.value + 1
-    const length = store.historyList.length
-    const i = a >= length ? a - length : a
-    router.replace({
-        path: "/Play",
-        query: {
-            songId: store.historyList[i].id,
-            index: i
+    if (store.historyList.length == 1) {
+        loop()
+    } else {
+        if (type) {
+            store.audio = store.newAudio
+            const a = index.value + 1
+            const length = store.historyList.length
+            const i = a >= length ? a - length : a
+            router.replace({
+                path: "/Play",
+                query: {
+                    songId: store.historyList[i].id,
+                    index: i
+                }
+            });
+        } else {
+            store.audio = store.oldAudio
+            router.replace({
+                path: "/Play",
+                query: {
+                    songId: store.historyList.at(index.value - 1).id,
+                    index: index.value - 1 < 0 ? index.value - 1 + store.historyList.length : index.value - 1
+                }
+            });
+
         }
-    });
+    }
 
 }
 const loop = () => {
-    console.log(123)
-    nextSong()
+    if (store.historyList.length != 1) {
+        changeSong(1)
+    } else {
+        initTime();
+        stop()
+        play()
+        store.play.seek(0)
+        store.audio.currentTime = 0;
+        pubsub.publish("move", cR.value)
+        console.log(store.audio.src);
+    }
 }
 const initTime = () => {
     time.value = moment(0)
@@ -267,7 +282,8 @@ const watchStop = watch([route, beginTime, store],
         // store.changeCurrentRow(currentRow.value)
         if (time.value.unix() == oTime.value.unix()) {
             if (JSON.stringify(store.play) != '{}') {
-                nextSong()
+                loop()
+
             }
         }
         if (songs.value.length) {
@@ -324,7 +340,7 @@ const watchStop = watch([route, beginTime, store],
             <el-col :span="8">
                 <div style="display: flex;flex-direction: column;flex-wrap: nowrap;align-content: center;">
                     <div class="btngroup">
-                        <el-button type="primary" circle color="#000" @click="previousSong" :disabled='showBtnType'>
+                        <el-button type="primary" circle color="#000" @click="changeSong(0)" :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-29_shangyiji"></i>
                             </el-icon>
@@ -341,7 +357,7 @@ const watchStop = watch([route, beginTime, store],
                                 <i class="iconfont icon-28_bofang"></i>
                             </el-icon>
                         </el-button>
-                        <el-button type="primary" circle color="#000" @click="nextSong" :disabled='showBtnType'>
+                        <el-button type="primary" circle color="#000" @click="changeSong(1)" :disabled='showBtnType'>
                             <el-icon>
                                 <i class="iconfont icon-30_xiayiji"></i>
                             </el-icon>

@@ -48,6 +48,7 @@ export const playStore = defineStore("playStore", {
       songs: [],
       play: {
         stop: () => {},
+        seek: (parm: number) => {},
       },
       songsInfo,
       newSongsInfo,

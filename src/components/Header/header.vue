@@ -25,8 +25,8 @@ const uS = userStore()
 const historyList: any = ref([])
 
 onMounted(async () => {
-    const { result: { hots } } = await getSearchHot()
-    hotSearchList.value = (hots)
+    // const { result: { hots } } = await getSearchHot()
+    // hotSearchList.value = (hots)
 })
 const userInputSearch = (e: any) => {
     debounce(() => {
@@ -140,12 +140,12 @@ watch([route],
                                 </el-tag>
                             </div>
                             <div class="dashed" />
-                            <div class="trending">
+                            <!-- <div class="trending">
                                 <p>热搜榜</p>
                                 <ul v-for="item in hotSearchList">
                                     <li>{{ item.first }}</li>
                                 </ul>
-                            </div>
+                            </div> -->
 
                         </div>
                         <template #reference>

@@ -4,15 +4,13 @@ import 'animate.css';
 import { useRouter } from "vue-router"
 import { userList } from '@/store/User/userList';
 const recommendPic = ref("")
-const myFMPic = ref("")
+const myFMPic = ref()
 const box: any = ref(null)
 const router = useRouter()
 const uL = userList()
 
 onMounted(async () => {
-    await uL.getUserRecommendSongsList();
-    recommendPic.value = (uL.recommendSongs[0] as any).al.picUrl + '?param==400y400'
-    myFMPic.value = (uL.myFm as any).picUrl + '?param==200y200'
+
 })
 const play = () => {
     alert("播放日推歌曲")
@@ -51,16 +49,18 @@ const toList = (type: number) => {
             为你推荐:
         </div>
         <div class="m">
-            <div class="recommendList " ref="box" @click="toList(0)">
-                <img :src="recommendPic" alt="" style="width: 100%;height: 600px;object-fit: cover;" />
+            <div class="recommendList " ref="box" @click="toList(0)" v-if="uL.recommendSongs.length">
+                <img :src="(uL.recommendSongs[0] as any).al.picUrl + '?param==400y400'" alt=""
+                    style="width: 100%;height: 600px;object-fit: cover;" />
                 <div class="secondTitle">
                     <p>每日推荐</p>
                 </div>
                 <i class="iconfont  icon-bofang" @click="play"></i>
             </div>
-            <div class="myFMList" @click="toList(1)">
+            <div class="myFMList" @click="toList(1)" v-if="JSON.stringify(uL.myFm) != '{}'">
                 <div>
-                    <img :src="myFMPic" alt="" style="width: 300px;height: 100%;object-fit: cover;" />
+                    <img :src="(uL.myFm as any).picUrl + '?param==200y200'" alt=""
+                        style="width: 300px;height: 100%;object-fit: cover;" />
                 </div>
                 <div class="secondTitle">
                     <p>私人雷达</p>
