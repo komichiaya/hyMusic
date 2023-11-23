@@ -70,9 +70,15 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/recommend",
-    name: "recommend",
-    component: () => import("../pages/recommend/index.vue"),
+    path: "/Login",
+    name: "Login",
+    component: () => import("../pages/Login/index.vue"),
+  },
+  {
+    path: "/more/:t",
+    name: "more",
+    props: r => ({ t: r.params.t, type: r.query.type }),
+    component: () => import("../pages/More/index.vue"),
   },
   {
     redirect: "/Home",
@@ -88,18 +94,12 @@ const router = createRouter({
   },
 });
 router.beforeEach(async (to, from) => {
+  // const s = userStore();
+  // if (!s.isLogin && to.name !== "Login") {
+  //   return { name: "Login" };
+  // }
   if (from.path == "/Play") {
     localStorage.setItem("ID", String(from.query.songId));
-  }
-});
-router.beforeResolve(async to => {
-  const s = userStore();
-  const res = await userStatus();
-  if (res.code == 200) {
-    const { anonimousUser } = res.account;
-    if (anonimousUser) {
-      s.isLogin = false;
-    }
   }
 });
 export default router;

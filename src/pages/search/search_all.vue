@@ -16,10 +16,7 @@ const title: any = [{
 }, {
     name: '专辑',
     type: "albums"
-}, {
-    name: '用户',
-    type: "users"
-}]//'电台'
+},]//'电台'
 const u = userList()
 const route = useRoute()
 const keywords = ref()
@@ -33,14 +30,14 @@ onMounted(() => {
 const search = async (keywords: string) => {
     await Search.getSearchMore(keywords, 30, 1018)
 }
-// watch(() => route,
-//     (a, b) => {
-//         if (a.name == 'Search_all') {
-//             search(String(a.query.s))
-//         }
-//         console.log(a.query, a.path);
-//     },
-//     { deep: true, })
+watch(() => route,
+    (a, b) => {
+        if (a.name == 'Search_all') {
+            search(String(a.query.s))
+        }
+        console.log(a.query, a.path);
+    },
+    { deep: true, })
 </script>
 <template>
     <div class="m" v-if="Search.searchList.length">

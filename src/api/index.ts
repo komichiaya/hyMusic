@@ -105,17 +105,24 @@ export const getSongListDetail = (id: number | string) =>
       id,
     },
   });
-export const getUserFollows = (uid: number | string) =>
+export const getUserFollows = (
+  uid: number | string,
+  offset: number = 30,
+  limit: number = 0
+) =>
   http.get("/user/follows", {
     params: {
       uid,
+      offset,
+      limit,
     },
   });
-export const getUserLikeArtists = (limit: number) =>
+export const getUserLikeArtists = (limit: number, offset: number) =>
   http.get("/artist/sublist", {
     params: {
       limit,
       timestamp: new Date().getTime(),
+      offset,
     },
   });
 

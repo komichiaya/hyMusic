@@ -71,12 +71,27 @@ const morePage = () => {
             name: "User",
             params: {
                 id: uS.userInfo.userId
-            }
+            },
         })
     } else if (props.title == "推荐歌单") {
         router.push({
-            name: "recommend",
-
+            name: "more",
+            params: {
+                t: "songSheet"
+            },
+            query: {
+                type: 1000
+            }
+        })
+    } else if (props.title == "你的关注") {
+        router.push({
+            name: "more",
+            params: {
+                t: "RecommendedSinger"
+            },
+            query: {
+                type: 100
+            }
         })
     }
 

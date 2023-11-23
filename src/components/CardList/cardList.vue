@@ -8,7 +8,9 @@ interface songListType {
     name: string
     coverImgUrl: string,
     picUrl: string,
-    id: number
+    id: number,
+    avatarUrl: string
+    nickname: string
 }
 const props = defineProps({
     type: String,
@@ -34,14 +36,18 @@ const props = defineProps({
 })
 const router = useRouter()
 const route = useRoute()
-const { width, height } = useWindowSize()
-const count = ref(5)
+const { width } = useWindowSize()
+const count = ref(4)
 
 const nowLimit = ref(1)
 
 onMounted(() => {
     nowLimit.value = Number(route.params.limit) || 1
-
+    if (width.value >= 1700) {
+        count.value = 4
+    } else {
+        count.value = 6
+    }
 })
 const toList = (id: number | string, index: number) => {
     // 0:歌单 1:歌手 2:专辑 3：日推
@@ -67,29 +73,35 @@ const toList = (id: number | string, index: number) => {
         }
     })
 }
-watch([width.value, route],
-    ([width, r], [preWidth, preR]) => {
-        if (Number(width) >= 1920) {
-            count.value = 8
-        } else {
+watch([width, route],
+    ([w, r], [preW, preR]) => {
+        console.log(count.value);
+        if (Number(w) >= 1700) {
             count.value = 4
+        } else {
+            count.value = 6
         }
         nowLimit.value = Number((r as any).params.limit)
     },
 )
 </script>
 <template>
-    <div class="m">
-        <div v-for="(item, index) in songList">
-            <el-card :body-style="{ padding: '15px' }" @click="toList(item.id, index)" style="cursor: pointer;">
-                <div class="img">
-                    <el-image :src="item.coverImgUrl || item.picUrl" class="image" lazy />
+    <div style="margin-top: 40px;">
+        <el-row :gutter="20">
+            <el-col :span="count" v-for="(item, index) in songList">
+                <div style="width: 250px;">
+                    <el-card :body-style="{ padding: '15px' }" @click="toList(item.id, index)" style="cursor: pointer;">
+                        <div class="img">
+                            <el-image :src="item?.coverImgUrl || item?.picUrl || item?.avatarUrl + + '?param=200y200'"
+                                class="image" lazy />
+                        </div>
+                        <div class="text">
+                            <p>{{ item.name || item.nickname }}</p>
+                        </div>
+                    </el-card>
                 </div>
-                <div class="text">
-                    <p>{{ item.name }}</p>
-                </div>
-            </el-card>
-        </div>
+            </el-col>
+        </el-row>
         <div class="foot" v-if="limit > 24">
             <el-pagination layout="prev, pager, next" :page-count="Math.ceil((limit / 24))" hide-on-single-page
                 v-model:current-page="nowLimit" @current-change="(e) => currentChange(e)" />
@@ -100,42 +112,16 @@ watch([width.value, route],
 
 <style scoped lang="less">
 /* @import url(); 引入css类 */
-.m {
-    display: grid;
-    grid-template-columns: repeat(v-bind(count), minmax(200px, 1fr));
-    grid-gap: 20px;
-    margin-top: 40px;
+.el-col {
+    margin-bottom: 20px;
+}
 
-    .img {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
+.text {
 
-        .image {
-            border: 1px;
-            border-radius: 50%;
-        }
-
-    }
-
-    .text {
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        flex-direction: column;
-        margin-bottom: 20px;
-
-    }
-
-    .foot {
-        grid-column: 1 / span v-bind(count);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        align-content: center;
-        margin-top: 10px;
+    p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 </style>

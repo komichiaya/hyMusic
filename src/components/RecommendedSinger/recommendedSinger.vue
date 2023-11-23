@@ -10,12 +10,28 @@ type arr = { name: string, img1v1Url: string, id: number | string }
 const props = defineProps({
     userFollows: Array as PropType<arr[]>
 })
+const morePage = () => {
+    router.push({
+        name: "more",
+        params: {
+            t: "RecommendedSinger"
+        },
+        query: {
+            type: 100
+        }
+    })
+}
 
 </script>
 <template>
     <div class="w">
         <div class="title">
             你的关注:
+            <el-link @click="morePage">
+                more<el-icon class="el-icon--right">
+                    <DArrowRight />
+                </el-icon>
+            </el-link>
         </div>
         <div class="averageList">
             <el-card class="box-card" v-for="(item, index) in userFollows" :key="index" style="cursor: pointer;"

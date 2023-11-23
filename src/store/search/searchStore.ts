@@ -18,6 +18,7 @@ export const SearchStroe = defineStore("SearchStroe", {
     ) {
       const res = await getCloudSearch(keywords, limit, type);
       if (res.code === 200) {
+        console.log(type);
         switch (type) {
           case 1:
             const { songs, songCount } = res.result;
@@ -34,6 +35,14 @@ export const SearchStroe = defineStore("SearchStroe", {
           case 1000:
             const { playlists, playlistCount } = res.result;
             this.searchResList = playlists;
+            break;
+          case 1009:
+            const { djRadiosCount, djRadios } = res.result;
+            this.searchResList = djRadios;
+            break;
+          case 1002:
+            const { userprofileCount, userprofiles } = res.result;
+            this.searchResList = userprofiles;
             break;
         }
       }
@@ -67,6 +76,14 @@ export const SearchStroe = defineStore("SearchStroe", {
             const { playlists, playlistCount } = res.result;
             this.searchResList = playlists;
 
+            break;
+          case 1009:
+            const { djRadiosCount, djRadios } = res.result;
+            this.searchResList = djRadios;
+            break;
+          case 1002:
+            const { userprofileCount, userprofiles } = res.result;
+            this.searchResList = userprofiles;
             break;
         }
       }

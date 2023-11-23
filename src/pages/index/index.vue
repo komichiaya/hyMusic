@@ -7,7 +7,12 @@ import { userStore } from '@/store/User/userInfo'
 const uL = userList()
 const uS = userStore()
 onMounted(async () => {
-    const id = uS.userInfo.userId
+    let id
+    if (JSON.parse(localStorage.getItem("userID") || '')) {
+        id = JSON.parse(String(localStorage.getItem("userID")))
+    } else {
+        id = uS.userInfo.userId
+    }
     await uL.getUserList(id, 19, 0)
     await uL.getUserRecommend()
     await uS.getFollowsFriend(id)
@@ -20,7 +25,7 @@ onMounted(async () => {
 <template>
     <songSheet :title="'用户歌单'" :songList="uL.playList_less" v-if="uS.userInfo.userId" />
     <Recommend />
-    <RecommendedSinger :userFollows='uS.followArtists' />
+    <RecommendedSinger :userFollows='uS.followArtists' v-if="uS.userInfo.userId" />
     <songSheet :title="'推荐歌单'" :songList="uL.recommendList_less" />
 </template>
 <style lang="less"></style>

@@ -27,6 +27,10 @@ const historyList: any = ref([])
 onMounted(async () => {
     // const { result: { hots } } = await getSearchHot()
     // hotSearchList.value = (hots)
+    const searchList = JSON.parse(localStorage.getItem("searchList") || "[]")
+    if (searchList.length) {
+        historyList.value = searchList
+    }
 })
 const userInputSearch = (e: any) => {
     debounce(() => {
@@ -50,6 +54,7 @@ const userEnterSearch = (e: any) => {
         arr.unshift(search.value)
         const list = new Set(arr)
         historyList.value = [...list]
+        localStorage.setItem("searchList", JSON.stringify([...list]))
         router.push({
             path: "/search/all/search_all",
             query: {

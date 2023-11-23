@@ -12,6 +12,17 @@ const h = ref()
 const f = ref()
 const { height: hh } = useElementSize(h)
 const { height: fh } = useElementSize(f)
+import { userStore } from "@/store/User/userInfo";
+import { userStatus } from "@/api";
+const StoreUser = userStore()
+onMounted(async () => {
+  // console.log("全局onMounted")
+  const { data } = await userStatus();
+  if (data.code == 200) {
+    const { anonimousUser } = data.account;
+    StoreUser.isLogin = !anonimousUser
+  }
+})
 </script>
 
 <template>

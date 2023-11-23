@@ -18,8 +18,6 @@ const typeList = ref([{
     c: '专辑', e: "album", t: 10
 }, {
     c: '电台', e: "fm", t: 1009
-}, {
-    c: '用户', e: 'user', t: 1002
 }])
 const id: any = ref(null)
 const t = ref('')
@@ -63,7 +61,6 @@ onMounted(() => {
 })
 watch([route, width],
     ([newRoute, newWidth], [oldRoute, oldWidth]) => {
-        console.log(newRoute.params.type)
         t.value = String(newRoute.params.type)
         w.value = newWidth + 'px'
     })

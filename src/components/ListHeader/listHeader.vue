@@ -1,4 +1,4 @@
-// 0:歌单/专辑 1:歌手
+// 0:歌单 1:歌手 2:专辑 3:日推
 <script setup lang="ts">
 import { songListInfo } from "@/store/SongList/songListInfo"
 import { userList } from "@/store/User/userList"
@@ -7,6 +7,7 @@ import Calendar from "@/components/Calendar/index.vue"
 const props = defineProps(['type', 'listHeaders', 'listId'])
 const sLT = songListInfo()
 const days = ref(computed(() => new Date().getDate()))
+// 0:歌单 1:歌手 2:专辑 3：日推
 const imgUrl = ref(computed(() => {
     switch (props.type) {
         case 0:
@@ -17,6 +18,13 @@ const imgUrl = ref(computed(() => {
             return props.listHeaders.blurPicUrl
         case 3:
             return;
+    }
+}))
+const btnText = ref(computed(() => {
+    if (props.type == 1) {
+        return "播放热门歌曲"
+    } else {
+        return "播放"
     }
 }))
 onMounted(() => {
@@ -60,7 +68,6 @@ onMounted(() => {
                 </div>
                 <div class="info">
                     <p>{{ listHeaders.description || listHeaders.briefDesc }}</p>
-
                 </div>
                 <div class="btn">
                     <el-button type="primary">
@@ -69,10 +76,10 @@ onMounted(() => {
                             <!-- <i class="iconfont icon-28_bofang"></i> -->
                         </el-icon>
                         <span style='margin-left: 8px;'>
-                            {{ type ? "播放热门歌曲" : "播放" }}
+                            {{ btnText }}
                         </span>
                     </el-button>
-                    <el-button type="info" plain>
+                    <el-button type="info" plain v-if="type == 1">
                         <el-icon>
                             <i class="iconfont icon-aixin"></i>
                         </el-icon>
